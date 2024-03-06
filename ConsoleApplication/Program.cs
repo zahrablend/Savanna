@@ -9,17 +9,19 @@ internal static class Program
     {
         var fieldSize = new FieldDisplayer.FieldSize(100, 40);
         var gameEngine = new GameEngine(fieldSize);
-        int aCount = 0, lCount = 0;
+        int antelopeCount = 0, lionCount = 0;
+        bool addLion = false;
+        bool gameOver = false;
 
         string[] gameStates = new string[3];
 
-        while (true)
+        while (!gameOver)
         {
             gameStates[2] = gameEngine.DrawField(new FieldDisplayer());
             Console.Clear(); // Clear the console
             Console.WriteLine(gameStates[2]);
 
-            if (aCount < 3)
+            if (!addLion && antelopeCount <= 10)
             {
                 Console.WriteLine("Add A to game field. Press A to continue or S to skip.");
                 ConsoleKey key = await GetKeyPress();
@@ -27,14 +29,18 @@ internal static class Program
                 {
                     var antelope = new Antelope();
                     gameEngine.AddAnimal(antelope);
-                    aCount++;
+                    antelopeCount++;
                 }
-                else if (key == ConsoleKey.S)
+                else if (key == ConsoleKey.S && antelopeCount >= 2)
                 {
-                    aCount = 3;
+                    addLion = true;
+                }
+                if (antelopeCount > 10)
+                {
+                    addLion = true;
                 }
             }
-            else if (lCount < 3)
+            if (addLion && lionCount < 10)
             {
                 Console.WriteLine("Add L to game field. Press L to continue or S to skip.");
                 ConsoleKey key = await GetKeyPress();
@@ -42,20 +48,20 @@ internal static class Program
                 {
                     var lion = new Lion();
                     gameEngine.AddAnimal(lion);
-                    lCount++;
+                    lionCount++;
                 }
-                else if (key == ConsoleKey.S)
+                else if (key == ConsoleKey.S && lionCount >= 2)
                 {
-                    lCount = 3;
+                    gameOver = true;
                 }
             }
-            else
+            if (lionCount == 10)
             {
-                Console.WriteLine("Game Over");
-                Console.ReadKey();
-                break;
+                gameOver = true;
             }
         }
+        Console.WriteLine("Game Over");
+        Console.ReadKey();
     }
 
     static async Task<ConsoleKey> GetKeyPress()
