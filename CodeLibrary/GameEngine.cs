@@ -37,4 +37,14 @@ public class GameEngine
     {
         return fieldDisplayer.DrawField(_gameField, _fieldSize.Height, _fieldSize.Width);
     }
+
+    public List<IAnimal> GetAnimals()
+    {
+        return _animals;
+    }
+
+    public IAnimal[,] GetGameField()
+    {
+        return _gameField;
+    }
 }

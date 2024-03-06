@@ -28,15 +28,15 @@ public class FieldDisplayer
                 var animal = gameField[i, j];
                 if (animal is Antelope)
                 {
-                    sb.Append("A");
+                    sb.Append('A');
                 }
                 else if (animal is Lion)
                 {
-                    sb.Append("L");
+                    sb.Append('L');
                 }
                 else
                 {
-                    sb.Append(".");
+                    sb.Append('.');
                 }
             }
             sb.AppendLine();
