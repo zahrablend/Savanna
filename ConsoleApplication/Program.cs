@@ -1,56 +1,77 @@
 ﻿using CodeLibrary;
+using CodeLibrary.Animals;
 
 namespace ConsoleApplication;
 
 internal static class Program
 {
-    static void Main(string[] args)
+    static async Task Main(string[] args)
     {
         var fieldSize = new FieldDisplayer.FieldSize(100, 40);
         var gameEngine = new GameEngine(fieldSize);
-        var fieldDisplayer = new FieldDisplayer();
-        int numberOfAntelopes = 0;
-        ConsoleKey button;
+        int aCount = 0, lCount = 0;
 
-        while (numberOfAntelopes < 2)
+        string[] gameStates = new string[3];
+
+        while (true)
         {
-            Console.WriteLine("Press 'A' to add an Antelope, 'S' to stop, when you have added enough of Antelopes");
-            gameEngine.DrawField(fieldDisplayer);
+            gameStates[2] = gameEngine.DrawField(new FieldDisplayer());
+            Console.Clear(); // Clear the console
+            Console.WriteLine(gameStates[2]);
 
-            button = Console.ReadKey(true).Key;
-            if (button == ConsoleKey.A)
+            if (aCount < 3)
             {
-                gameEngine.AddAnimal(new CodeLibrary.Animals.Antelope());
-                numberOfAntelopes++;
-                Console.Clear();
-                gameEngine.DrawField(fieldDisplayer);
+                Console.WriteLine("Add A to game field. Press A to continue or S to skip.");
+                ConsoleKey key = await GetKeyPress();
+                if (key == ConsoleKey.A)
+                {
+                    var antelope = new Antelope();
+                    gameEngine.AddAnimal(antelope);
+                    aCount++;
+                }
+                else if (key == ConsoleKey.S)
+                {
+                    aCount = 3;
+                }
             }
-            else if (button == ConsoleKey.S)
+            else if (lCount < 3)
             {
-                Console.WriteLine("Hello");
+                Console.WriteLine("Add L to game field. Press L to continue or S to skip.");
+                ConsoleKey key = await GetKeyPress();
+                if (key == ConsoleKey.L)
+                {
+                    var lion = new Lion();
+                    gameEngine.AddAnimal(lion);
+                    lCount++;
+                }
+                else if (key == ConsoleKey.S)
+                {
+                    lCount = 3;
+                }
+            }
+            else
+            {
+                Console.WriteLine("Game Over");
+                Console.ReadKey();
                 break;
             }
         }
+    }
 
-        //Console.WriteLine("Press 'L' to add a Lion, 'S' to stop, when you have added enough of Lions");
-        //int numberOfLions = 0;
-        //while (numberOfLions < 10)
-        //{
-        //    var key = Console.ReadKey(true).Key;
-        //    if (key == ConsoleKey.L)
-        //    {
-        //        gameEngine.AddAnimal(new CodeLibrary.Animals.Lion());
-        //        numberOfLions++;
-        //        Console.Clear();
-        //        gameEngine.DrawField(fieldDisplayer);
-        //    }
-        //    else if (key == ConsoleKey.S && numberOfLions >= 2)
-        //    {
-        //        break;
-        //    }
-        //    Console.Clear();
-        //    gameEngine.DrawField(fieldDisplayer);
-        //}
+    static async Task<ConsoleKey> GetKeyPress()
+    {
+        while (true)
+        {
+            if (Console.KeyAvailable)
+            {
+                var key = Console.ReadKey(true).Key;
+                if (key == ConsoleKey.A || key == ConsoleKey.S || key == ConsoleKey.L)
+                {
+                    return key;
+                }
+            }
+            await Task.Delay(100);
+        }
     }
 
 }

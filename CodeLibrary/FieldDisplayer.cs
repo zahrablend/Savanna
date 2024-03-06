@@ -1,5 +1,6 @@
 ﻿using CodeLibrary.Animals;
 using CodeLibrary.Interfaces;
+using System.Text;
 
 namespace CodeLibrary;
 
@@ -17,8 +18,9 @@ public class FieldDisplayer
         }
     }
     //Ignore the warning in this context
-    public void DrawField(IAnimal[,] gameField, int fieldHeight, int fieldWidth)
+    public string DrawField(IAnimal[,] gameField, int fieldHeight, int fieldWidth)
     {
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < fieldHeight; i++)
         {
             for (int j = 0; j < fieldWidth; j++)
@@ -26,18 +28,19 @@ public class FieldDisplayer
                 var animal = gameField[i, j];
                 if (animal is Antelope)
                 {
-                    Console.WriteLine("A");
+                    sb.Append("A");
                 }
                 else if (animal is Lion)
                 {
-                    Console.Write("L");
+                    sb.Append("L");
                 }
                 else
                 {
-                    Console.Write(".");
+                    sb.Append(".");
                 }
             }
-            Console.WriteLine();
+            sb.AppendLine();
         }
+        return sb.ToString();
     }
 }

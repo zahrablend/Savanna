@@ -33,8 +33,8 @@ public class GameEngine
         _animals.Add(animal);
     }
 
-    public void DrawField(FieldDisplayer fieldDisplayer)
+    public string DrawField(FieldDisplayer fieldDisplayer)
     {
-        fieldDisplayer.DrawField(_gameField, _fieldSize.Height, _fieldSize.Width);
+        return fieldDisplayer.DrawField(_gameField, _fieldSize.Height, _fieldSize.Width);
     }
 }
