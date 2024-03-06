@@ -7,7 +7,7 @@ internal static class Program
 {
     static async Task Main(string[] args)
     {
-        var fieldSize = new FieldDisplayer.FieldSize(100, 40);
+        var fieldSize = new FieldDisplayer.FieldSize(100, 20);
         var gameEngine = new GameEngine(fieldSize);
         int antelopeCount = 0, lionCount = 0;
         bool addLion = false;
@@ -40,7 +40,7 @@ internal static class Program
                     addLion = true;
                 }
             }
-            if (addLion && lionCount < 10)
+            if (addLion && lionCount <= 10)
             {
                 Console.WriteLine("Add L to game field. Press L to continue or S to skip.");
                 ConsoleKey key = await GetKeyPress();
