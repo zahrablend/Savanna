@@ -8,13 +8,13 @@ public class FieldDisplayer
 {
     public struct FieldSize
     {
-        public int Width { get; }
         public int Height { get; }
+        public int Width { get; }
 
-        public FieldSize(int width, int height)
+        public FieldSize(int height, int width)
         {
-            Width = width;
             Height = height;
+            Width = width;
         }
     }
     //Ignore the warning in this context

@@ -6,8 +6,8 @@ namespace CodeLibrary;
 public class Game
 {
     private char[,] gameField;
-    private int aCount;
-    private int lCount;
+    private int antelopeCount;
+    private int lionCount;
     private Random random;
     private GameEngine gameEngine;
 
@@ -21,12 +21,13 @@ public class Game
                 gameField[i, j] = '.'; // Fill the game field with '.'
             }
         }
-        aCount = 0;
-        lCount = 0;
+        antelopeCount = 0;
+        lionCount = 0;
         random = new Random();
-        gameEngine = new GameEngine(new FieldDisplayer.FieldSize(100, 20));
+        gameEngine = new GameEngine(new FieldDisplayer.FieldSize(20,100));
     }
 
+    private bool moveMade = false;
     public async Task Run()
     {
         while (true)
@@ -39,26 +40,47 @@ public class Game
             Console.Clear(); // Clear the console
             Console.WriteLine(gameState);
 
-            if (aCount < 10)
+            if (!moveMade && antelopeCount < 10)
             {
                 await AddAnimal('A');
             }
-            else if (lCount < 10)
+            else if (!moveMade && lionCount < 10)
             {
                 await AddAnimal('L');
             }
             else
             {
-                Console.WriteLine("Game Over");
-                Console.ReadKey();
-                break;
+                Console.WriteLine("Make a move");
+                MoveAnimal();
+                moveMade = true;
+                Console.WriteLine(gameEngine.DrawField(new FieldDisplayer()));
+                Console.WriteLine("Make a move");
+                MoveAnimal();
+                Console.WriteLine(gameEngine.DrawField(new FieldDisplayer()));
             }
         }
     }
 
+    private void MoveAnimal()
+    {
+        IAnimal[,] currentGameField = gameEngine.GetGameField();
+        foreach (var animal in gameEngine.GetAnimals())
+        {
+            if (animal != null)
+            {
+                // Call the MoveAnimal method of the animal
+                animal.MoveAnimal(currentGameField, gameField.GetLength(0), gameField.GetLength(1));
+
+                // Update the gameField in the Game class
+                gameField[animal.X, animal.Y] = animal is Antelope ? 'A' : 'L';
+            }
+        }
+        gameEngine.UpdateGameField(currentGameField);
+    }
+
     private async Task AddAnimal(char animal)
     {
-        if ((animal == 'A' && aCount >= 10) || (animal == 'L' && lCount >= 10))
+        if ((animal == 'A' && antelopeCount >= 10) || (animal == 'L' && lionCount >= 10))
         {
             return;
         }
@@ -76,11 +98,11 @@ public class Game
             gameField[indexX, indexY] = animal;
             if (animal == 'A')
             {
-                aCount++;
+                antelopeCount++;
             }
             else if (animal == 'L')
             {
-                lCount++;
+                lionCount++;
             }
 
             IAnimal gameAnimal = animal == 'A' ? new Antelope() : new Lion();
@@ -88,15 +110,15 @@ public class Game
             gameAnimal.Y = indexY;
             gameEngine.AddAnimal(gameAnimal);
         }
-        else if (key == ConsoleKey.S && ((animal == 'A' && aCount >= 2) || (animal == 'L' && lCount >= 2)))
+        else if (key == ConsoleKey.S && ((animal == 'A' && antelopeCount >= 2) || (animal == 'L' && lionCount >= 2)))
         {
             if (animal == 'A')
             {
-                aCount = 10;
+                antelopeCount = 10;
             }
             else if (animal == 'L')
             {
-                lCount = 10;
+                lionCount = 10;
             }
         }
     }
@@ -118,3 +140,5 @@ public class Game
         }
     }
 }
+
+

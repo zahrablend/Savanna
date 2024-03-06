@@ -47,4 +47,9 @@ public class GameEngine
     {
         return _gameField;
     }
+
+    public void UpdateGameField(IAnimal[,] gameField)
+    {
+        _gameField = gameField;
+    }
 }
