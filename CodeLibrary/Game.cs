@@ -10,6 +10,7 @@ public class Game
     private int lionCount;
     private Random random;
     private GameEngine gameEngine;
+    private FieldDisplayer fieldDisplayer;
 
     public Game()
     {
@@ -24,7 +25,8 @@ public class Game
         antelopeCount = 0;
         lionCount = 0;
         random = new Random();
-        gameEngine = new GameEngine(new FieldDisplayer.FieldSize(20,100));
+        fieldDisplayer = new FieldDisplayer();
+        gameEngine = new GameEngine(new FieldDisplayer.FieldSize(20,100), fieldDisplayer);
     }
 
     private bool moveMade = false;
@@ -53,10 +55,7 @@ public class Game
                 Console.WriteLine("Make a move");
                 MoveAnimal();
                 moveMade = true;
-                Console.WriteLine(gameEngine.DrawField(new FieldDisplayer()));
-                Console.WriteLine("Make a move");
-                MoveAnimal();
-                Console.WriteLine(gameEngine.DrawField(new FieldDisplayer()));
+                Console.WriteLine(gameEngine.DrawField());
             }
         }
     }
@@ -69,7 +68,7 @@ public class Game
             if (animal != null)
             {
                 // Call the MoveAnimal method of the animal
-                animal.MoveAnimal(currentGameField, gameField.GetLength(0), gameField.GetLength(1));
+                animal.MoveAnimal(currentGameField, gameField.GetLength(0), gameField.GetLength(1), fieldDisplayer.DisplayNewPosition);
 
                 // Update the gameField in the Game class
                 gameField[animal.X, animal.Y] = animal is Antelope ? 'A' : 'L';

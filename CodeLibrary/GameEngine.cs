@@ -1,4 +1,5 @@
-﻿using CodeLibrary.Interfaces;
+﻿using CodeLibrary.Animals;
+using CodeLibrary.Interfaces;
 
 namespace CodeLibrary;
 
@@ -7,12 +8,14 @@ public class GameEngine
     private IAnimal[,] _gameField;
     private List<IAnimal> _animals;
     private FieldDisplayer.FieldSize _fieldSize;
+    private FieldDisplayer _fieldDisplayer;
 
-    public GameEngine(FieldDisplayer.FieldSize fieldSize)
+    public GameEngine(FieldDisplayer.FieldSize fieldSize, FieldDisplayer fieldDisplayer)
     {
         _fieldSize = fieldSize;
         _gameField = new IAnimal[_fieldSize.Height, _fieldSize.Width];
         _animals = new List<IAnimal>();
+        _fieldDisplayer = fieldDisplayer;
     }
 
     public void AddAnimal(IAnimal animal)
@@ -33,9 +36,9 @@ public class GameEngine
         _animals.Add(animal);
     }
 
-    public string DrawField(FieldDisplayer fieldDisplayer)
+    public string DrawField()
     {
-        return fieldDisplayer.DrawField(_gameField, _fieldSize.Height, _fieldSize.Width);
+        return _fieldDisplayer.DrawField(_gameField, _fieldSize.Height, _fieldSize.Width);
     }
 
     public List<IAnimal> GetAnimals()
@@ -51,5 +54,20 @@ public class GameEngine
     public void UpdateGameField(IAnimal[,] gameField)
     {
         _gameField = gameField;
+    }
+
+    public void DisplayNewPosition(FieldDisplayer fieldDisplayer)
+    {
+        foreach (var animal in _animals)
+        {
+            int oldX = animal.X;
+            int oldY = animal.Y;
+            animal.MoveAnimal(_gameField, _fieldSize.Height, _fieldSize.Width, _fieldDisplayer.DisplayNewPosition);
+            if (animal.X != oldX || animal.Y != oldY)
+            {
+                _gameField[oldX, oldY] = null;
+                _gameField[animal.X, animal.Y] = animal;
+            }
+        }
     }
 }
