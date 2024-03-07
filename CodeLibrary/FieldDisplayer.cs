@@ -34,7 +34,7 @@ public class FieldDisplayer
     /// <param name="fieldHeight">The height of the game field.</param>
     /// <param name="fieldWidth">The width of the game field.</param>
     /// <returns>A string representation of the game field.</returns>
-    public static string DrawField(IAnimal[,] gameField, int fieldHeight, int fieldWidth)
+    public string DrawField(IAnimal[,] gameField, int fieldHeight, int fieldWidth)
     {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < fieldHeight; i++)

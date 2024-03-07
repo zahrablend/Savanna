@@ -1,5 +1,8 @@
 ﻿using CodeLibrary.Animals;
 using CodeLibrary.Interfaces;
+using System;
+using System.Diagnostics.Metrics;
+using System.Reflection.Metadata;
 
 namespace CodeLibrary;
 
@@ -57,8 +60,10 @@ public class Game
             }
             else
             {
+                // Create a copy of the animals list
+                var animalsCopy = new List<IAnimal>(gameEngine.GetAnimals());
                 //Start Game: 
-                foreach (var animal in gameEngine.GetAnimals())
+                foreach (var animal in animalsCopy)
                 {
                     gameEngine.MoveAnimal(animal);
                 }
@@ -67,7 +72,7 @@ public class Game
                 string updatedGameState = gameEngine.DrawField();
                 Console.Clear(); // Clear the console
                 Console.WriteLine(updatedGameState);
-
+                DisplayAnimalHealth();
                 // Wait for a second before the next iteration
                 await Task.Delay(1000);
             }
@@ -136,6 +141,32 @@ public class Game
                 }
             }
             await Task.Delay(100);
+        }
+    }
+
+    private void DisplayAnimalHealth()
+    {
+        int antelopeId = 1;
+        int lionId = 1;
+
+        foreach (var animal in gameEngine.GetAnimals())
+        {
+            // Ensure the health never goes below 0
+            if (animal.Health < 0)
+            {
+                animal.Health = 0;
+            }
+
+            if (animal is Antelope && antelopeId <= antelopeCount)
+            {
+                Console.WriteLine(animal.Health > 0 ? $"Antelope {antelopeId}: health {animal.Health}" : $"Antelope {antelopeId}: died");
+                antelopeId++;
+            }
+            else if (animal is Lion && lionId <= lionCount)
+            {
+                Console.WriteLine(animal.Health > 0 ? $"Lion {lionId}: health {animal.Health}" : $"Lion {lionId}: died");
+                lionId++;
+            }
         }
     }
 }

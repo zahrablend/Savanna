@@ -1,11 +1,12 @@
 ﻿using CodeLibrary.Animals;
+using CodeLibrary.Constants;
 using CodeLibrary.Interfaces;
 
 namespace CodeLibrary;
 
 public class GameEngine
 {
-    private IAnimal[,] _gameField; //not readonly!
+    private IAnimal?[,] _gameField; //not readonly!
     private List<IAnimal> _animals; //not readonly!
     private readonly FieldDisplayer.FieldSize _fieldSize;
     private readonly FieldDisplayer _fieldDisplayer;
@@ -39,6 +40,7 @@ public class GameEngine
         animal.Y = y;
         _gameField[x, y] = animal;
         _animals.Add(animal);
+        animal.Health = Constant.InitialHealth;
     }
 
     /// <summary>
@@ -50,14 +52,46 @@ public class GameEngine
         var (dx, dy) = GetMovementDirection(animal);
         var (newX, newY) = GetNewPosition(animal, dx, dy);
 
-        // Check if the new position is free
         if (_gameField[newX, newY] == null)
         {
-            // Move the animal to the new position
             _gameField[animal.X, animal.Y] = null;
             animal.X = newX;
             animal.Y = newY;
             _gameField[animal.X, animal.Y] = animal;
+        }
+
+        // Decrease health by HealthDecreasePerMove with each move
+        animal.Health -= Constant.HealthDecreasePerMove;
+
+        // Check the neighboring cells for other animals
+        for (int i = Math.Max(0, animal.X - 1); i <= Math.Min(_fieldSize.Height - 1, animal.X + 1); i++)
+        {
+            for (int j = Math.Max(0, animal.Y - 1); j <= Math.Min(_fieldSize.Width - 1, animal.Y + 1); j++)
+            {
+                var otherAnimal = _gameField[i, j];
+                if (otherAnimal != null)
+                {
+                    if (animal is Lion && otherAnimal is Antelope)
+                    {
+                        // Increase the lion's health by 1
+                        animal.Health += 1;
+                        // Decrease the antelope's health to 0
+                        otherAnimal.Health = 0;
+                    }
+                    else if (animal.GetType() == otherAnimal.GetType())
+                    {
+                        // Increase the count if the neighbor is of the same type
+                        animal.SameTypeNeighborCount++;
+                    }
+                }
+            }
+        }
+
+        // If the animal's health reaches 0, remove it from the game field
+        if (animal.Health <= 0)
+        {
+            _gameField[animal.X, animal.Y] = null;
+            _animals.Remove(animal);
         }
     }
 
