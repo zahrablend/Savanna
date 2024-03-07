@@ -1,4 +1,5 @@
-﻿using CodeLibrary.Interfaces;
+﻿using CodeLibrary.Animals;
+using CodeLibrary.Interfaces;
 
 namespace CodeLibrary;
 
@@ -38,17 +39,8 @@ public class GameEngine
     private static Random random = new Random();
     public void MoveAnimal(IAnimal animal)
     {
-        // Calculate the new position
-        int dx = random.Next(-animal.Speed, animal.Speed + 1);
-        int dy = random.Next(-animal.Speed, animal.Speed + 1);
-        int newX = (animal.X + dx) % _fieldSize.Height;
-        int newY = (animal.Y + dy) % _fieldSize.Width;
-
-        // Ensure the new position is within the game field boundaries
-        if (newX < 0) newX = 0;
-        if (newX >= _fieldSize.Height) newX = _fieldSize.Height - 1;
-        if (newY < 0) newY = 0;
-        if (newY >= _fieldSize.Width) newY = _fieldSize.Width - 1;
+        var (dx, dy) = GetMovementDirection(animal);
+        var (newX, newY) = GetNewPosition(animal, dx, dy);
 
         // Check if the new position is free
         if (_gameField[newX, newY] == null)
@@ -59,6 +51,53 @@ public class GameEngine
             animal.Y = newY;
             _gameField[animal.X, animal.Y] = animal;
         }
+    }
+
+    private (int dx, int dy) GetMovementDirection(IAnimal animal)
+    {
+        int dx = random.Next(-animal.Speed, animal.Speed + 1);
+        int dy = random.Next(-animal.Speed, animal.Speed + 1);
+
+        // Check for other animals within the vision range
+        for (int i = Math.Max(0, animal.X - animal.VisionRange); i <= Math.Min(_fieldSize.Height - 1, animal.X + animal.VisionRange); i++)
+        {
+            for (int j = Math.Max(0, animal.Y - animal.VisionRange); j <= Math.Min(_fieldSize.Width - 1, animal.Y + animal.VisionRange); j++)
+            {
+                var otherAnimal = _gameField[i, j];
+                if (otherAnimal != null && otherAnimal.GetType() != animal.GetType())
+                {
+                    // If the animal is an Antelope and it sees a Lion, it moves away
+                    if (animal is Antelope && otherAnimal is Lion)
+                    {
+                        dx = animal.X > otherAnimal.X ? animal.Speed : -animal.Speed;
+                        dy = animal.Y > otherAnimal.Y ? animal.Speed : -animal.Speed;
+                    }
+
+                    // If the animal is a Lion and it sees an Antelope, it moves towards it
+                    else if (animal is Lion && otherAnimal is Antelope)
+                    {
+                        dx = animal.X < otherAnimal.X ? animal.Speed : -animal.Speed;
+                        dy = animal.Y < otherAnimal.Y ? animal.Speed : -animal.Speed;
+                    }
+                }
+            }
+        }
+
+        return (dx, dy);
+    }
+
+    private (int newX, int newY) GetNewPosition(IAnimal animal, int dx, int dy)
+    {
+        int newX = (animal.X + dx) % _fieldSize.Height;
+        int newY = (animal.Y + dy) % _fieldSize.Width;
+
+        // Ensure the new position is within the game field boundaries
+        if (newX < 0) newX = 0;
+        if (newX >= _fieldSize.Height) newX = _fieldSize.Height - 1;
+        if (newY < 0) newY = 0;
+        if (newY >= _fieldSize.Width) newY = _fieldSize.Width - 1;
+
+        return (newX, newY);
     }
 
     public string DrawField()

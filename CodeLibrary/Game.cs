@@ -113,7 +113,7 @@ public class Game
         }
     }
 
-    private async Task<ConsoleKey> GetKeyPress()
+    private static async Task<ConsoleKey> GetKeyPress()
     {
         while (true)
         {
