@@ -43,16 +43,4 @@ public class FieldDisplayer
         }
         return sb.ToString();
     }
-
-    public void DisplayNewPosition(int lionX, int lionY, int antelopeX, int antelopeY)
-    {
-        if (lionX == -1 && lionY == -1)
-        {
-            Console.WriteLine($"No lion detected. Antelope moved to ({antelopeX}, {antelopeY}).");
-        }
-        else
-        {
-            Console.WriteLine($"Lion detected at ({lionX}, {lionY}). Antelope at ({antelopeX}, {antelopeY}) moved away.");
-        }
-    }
 }

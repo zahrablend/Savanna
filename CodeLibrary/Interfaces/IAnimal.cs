@@ -4,6 +4,5 @@ public interface IAnimal
 {
     int X { get; set; }
     int Y { get; set; }
-
-    void MoveAnimal(IAnimal[,] gameField, int fieldHeight, int fieldWidth, Action<int, int, int, int> displayNewPosition);
+    int Speed { get; init; }
 }

@@ -1,5 +1,4 @@
-﻿using CodeLibrary.Animals;
-using CodeLibrary.Interfaces;
+﻿using CodeLibrary.Interfaces;
 
 namespace CodeLibrary;
 
@@ -36,14 +35,35 @@ public class GameEngine
         _animals.Add(animal);
     }
 
+    private static Random random = new Random();
+    public void MoveAnimal(IAnimal animal)
+    {
+        // Calculate the new position
+        int dx = random.Next(-animal.Speed, animal.Speed + 1);
+        int dy = random.Next(-animal.Speed, animal.Speed + 1);
+        int newX = (animal.X + dx) % _fieldSize.Height;
+        int newY = (animal.Y + dy) % _fieldSize.Width;
+
+        // Ensure the new position is within the game field boundaries
+        if (newX < 0) newX = 0;
+        if (newX >= _fieldSize.Height) newX = _fieldSize.Height - 1;
+        if (newY < 0) newY = 0;
+        if (newY >= _fieldSize.Width) newY = _fieldSize.Width - 1;
+
+        // Check if the new position is free
+        if (_gameField[newX, newY] == null)
+        {
+            // Move the animal to the new position
+            _gameField[animal.X, animal.Y] = null;
+            animal.X = newX;
+            animal.Y = newY;
+            _gameField[animal.X, animal.Y] = animal;
+        }
+    }
+
     public string DrawField()
     {
         return _fieldDisplayer.DrawField(_gameField, _fieldSize.Height, _fieldSize.Width);
-    }
-
-    public List<IAnimal> GetAnimals()
-    {
-        return _animals;
     }
 
     public IAnimal[,] GetGameField()
@@ -51,23 +71,13 @@ public class GameEngine
         return _gameField;
     }
 
+    public List<IAnimal> GetAnimals()
+    {
+        return _animals;
+    }
+
     public void UpdateGameField(IAnimal[,] gameField)
     {
         _gameField = gameField;
-    }
-
-    public void DisplayNewPosition(FieldDisplayer fieldDisplayer)
-    {
-        foreach (var animal in _animals)
-        {
-            int oldX = animal.X;
-            int oldY = animal.Y;
-            animal.MoveAnimal(_gameField, _fieldSize.Height, _fieldSize.Width, _fieldDisplayer.DisplayNewPosition);
-            if (animal.X != oldX || animal.Y != oldY)
-            {
-                _gameField[oldX, oldY] = null;
-                _gameField[animal.X, animal.Y] = animal;
-            }
-        }
     }
 }

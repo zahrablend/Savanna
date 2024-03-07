@@ -29,7 +29,6 @@ public class Game
         gameEngine = new GameEngine(new FieldDisplayer.FieldSize(20,100), fieldDisplayer);
     }
 
-    private bool moveMade = false;
     public async Task Run()
     {
         while (true)
@@ -42,39 +41,31 @@ public class Game
             Console.Clear(); // Clear the console
             Console.WriteLine(gameState);
 
-            if (!moveMade && antelopeCount < 10)
+            if (antelopeCount < 10)
             {
                 await AddAnimal('A');
             }
-            else if (!moveMade && lionCount < 10)
+            else if (lionCount < 10)
             {
                 await AddAnimal('L');
             }
             else
             {
-                Console.WriteLine("Make a move");
-                MoveAnimal();
-                moveMade = true;
-                Console.WriteLine(gameEngine.DrawField());
+                //Start Game: 
+                foreach (var animal in gameEngine.GetAnimals())
+                {
+                    gameEngine.MoveAnimal(animal);
+                }
+
+                // Display the updated state of the game field
+                string updatedGameState = gameEngine.DrawField();
+                Console.Clear(); // Clear the console
+                Console.WriteLine(updatedGameState);
+
+                // Wait for a second before the next iteration
+                await Task.Delay(1000);
             }
         }
-    }
-
-    private void MoveAnimal()
-    {
-        IAnimal[,] currentGameField = gameEngine.GetGameField();
-        foreach (var animal in gameEngine.GetAnimals())
-        {
-            if (animal != null)
-            {
-                // Call the MoveAnimal method of the animal
-                animal.MoveAnimal(currentGameField, gameField.GetLength(0), gameField.GetLength(1), fieldDisplayer.DisplayNewPosition);
-
-                // Update the gameField in the Game class
-                gameField[animal.X, animal.Y] = animal is Antelope ? 'A' : 'L';
-            }
-        }
-        gameEngine.UpdateGameField(currentGameField);
     }
 
     private async Task AddAnimal(char animal)
@@ -121,7 +112,6 @@ public class Game
             }
         }
     }
-
 
     private async Task<ConsoleKey> GetKeyPress()
     {
