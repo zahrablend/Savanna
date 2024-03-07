@@ -5,19 +5,24 @@ namespace CodeLibrary;
 
 public class GameEngine
 {
-    private IAnimal[,] _gameField;
-    private List<IAnimal> _animals;
-    private FieldDisplayer.FieldSize _fieldSize;
-    private FieldDisplayer _fieldDisplayer;
+    private IAnimal[,] _gameField; //not readonly!
+    private List<IAnimal> _animals; //not readonly!
+    private readonly FieldDisplayer.FieldSize _fieldSize;
+    private readonly FieldDisplayer _fieldDisplayer;
+    private static readonly Random random = new();
 
     public GameEngine(FieldDisplayer.FieldSize fieldSize, FieldDisplayer fieldDisplayer)
     {
         _fieldSize = fieldSize;
         _gameField = new IAnimal[_fieldSize.Height, _fieldSize.Width];
-        _animals = new List<IAnimal>();
+        _animals = [];
         _fieldDisplayer = fieldDisplayer;
     }
 
+    /// <summary>
+    /// Adds an animal to the game field at a random unoccupied position.
+    /// </summary>
+    /// <param name="animal">The animal to be added to the game field.</param>
     public void AddAnimal(IAnimal animal)
     {
         int x;
@@ -36,7 +41,10 @@ public class GameEngine
         _animals.Add(animal);
     }
 
-    private static Random random = new Random();
+    /// <summary>
+    /// Moves an animal on the game field based on its speed and vision range.
+    /// </summary>
+    /// <param name="animal">The animal to be moved.</param>
     public void MoveAnimal(IAnimal animal)
     {
         var (dx, dy) = GetMovementDirection(animal);
@@ -53,6 +61,11 @@ public class GameEngine
         }
     }
 
+    /// <summary>
+    /// Calculates the direction in which an animal should move based on its speed and vision range.
+    /// </summary>
+    /// <param name="animal">The animal for which to calculate the movement direction.</param>
+    /// <returns>A tuple of integers representing the movement direction on the x and y axes.</returns>
     private (int dx, int dy) GetMovementDirection(IAnimal animal)
     {
         int dx = random.Next(-animal.Speed, animal.Speed + 1);
@@ -86,6 +99,13 @@ public class GameEngine
         return (dx, dy);
     }
 
+    /// <summary>
+    /// Calculates the new position of an animal based on its current position and the direction of movement.
+    /// </summary>
+    /// <param name="animal">The animal for which to calculate the new position.</param>
+    /// <param name="dx">The movement direction on the x-axis.</param>
+    /// <param name="dy">The movement direction on the y-axis.</param>
+    /// <returns>A tuple of integers representing the new position on the x and y axes.</returns>
     private (int newX, int newY) GetNewPosition(IAnimal animal, int dx, int dy)
     {
         int newX = (animal.X + dx) % _fieldSize.Height;
@@ -113,10 +133,5 @@ public class GameEngine
     public List<IAnimal> GetAnimals()
     {
         return _animals;
-    }
-
-    public void UpdateGameField(IAnimal[,] gameField)
-    {
-        _gameField = gameField;
     }
 }

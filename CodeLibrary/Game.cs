@@ -9,8 +9,8 @@ public class Game
     private int antelopeCount;
     private int lionCount;
     private Random random;
-    private GameEngine gameEngine;
-    private FieldDisplayer fieldDisplayer;
+    private readonly GameEngine gameEngine;
+    private readonly FieldDisplayer fieldDisplayer;
 
     public Game()
     {
@@ -29,6 +29,9 @@ public class Game
         gameEngine = new GameEngine(new FieldDisplayer.FieldSize(20,100), fieldDisplayer);
     }
 
+    /// <summary>
+    /// Runs the game, adding animals to the game field and moving them around.
+    /// </summary>
     public async Task Run()
     {
         while (true)
@@ -68,6 +71,10 @@ public class Game
         }
     }
 
+    /// <summary>
+    /// Adds an animal to the game field based on user input.
+    /// </summary>
+    /// <param name="animal">The character representing the type of animal to be added ('A' for Antelope, 'L' for Lion).</param>
     private async Task AddAnimal(char animal)
     {
         if ((animal == 'A' && antelopeCount >= 10) || (animal == 'L' && lionCount >= 10))
