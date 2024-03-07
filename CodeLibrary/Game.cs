@@ -30,7 +30,10 @@ public class Game
     }
 
     /// <summary>
-    /// Runs the game, adding animals to the game field and moving them around.
+    /// This is an asynchronous method that runs the game indefinitely. It first displays the initial state of the game field. 
+    /// If the count of antelopes is less than 10, it adds an antelope. If the count of lions is less than 10, it adds a lion. 
+    /// Once both the antelopes and lions reach a count of 10, the game starts. Each animal in the game is moved, and the updated state of the game field is displayed. 
+    /// The method then waits for a second before the next iteration.
     /// </summary>
     public async Task Run()
     {
