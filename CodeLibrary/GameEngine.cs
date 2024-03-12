@@ -43,10 +43,6 @@ public class GameEngine
         animal.Health = Constant.InitialHealth;
     }
 
-    /// <summary>
-    /// Moves an animal on the game field based on its speed and vision range.
-    /// </summary>
-    /// <param name="animal">The animal to be moved.</param>
     public void MoveAnimal(IAnimal animal)
     {
         var (dx, dy) = GetMovementDirection(animal);
@@ -55,15 +51,25 @@ public class GameEngine
         if (_gameField[newX, newY] == null)
         {
             _gameField[animal.X, animal.Y] = null;
-            animal.X = newX;
-            animal.Y = newY;
+            animal.Move(newX, newY);
             _gameField[animal.X, animal.Y] = animal;
         }
 
-        // Decrease health by HealthDecreasePerMove with each move
-        animal.Health -= Constant.HealthDecreasePerMove;
+        animal.DecreaseHealth(Constant.HealthDecreasePerMove);
+        CheckNeighboringCells(animal);
 
-        // Check the neighboring cells for other animals
+        if (animal.Health <= 0)
+        {
+            Death(animal);
+            return;
+        }
+        Birth(animal);
+        
+
+    }
+
+    private void CheckNeighboringCells(IAnimal animal)
+    {
         for (int i = Math.Max(0, animal.X - 1); i <= Math.Min(_fieldSize.Height - 1, animal.X + 1); i++)
         {
             for (int j = Math.Max(0, animal.Y - 1); j <= Math.Min(_fieldSize.Width - 1, animal.Y + 1); j++)
@@ -71,29 +77,45 @@ public class GameEngine
                 var otherAnimal = _gameField[i, j];
                 if (otherAnimal != null)
                 {
-                    if (animal is Lion && otherAnimal is Antelope)
-                    {
-                        // Increase the lion's health by 1
-                        animal.Health += 1;
-                        // Decrease the antelope's health to 0
-                        otherAnimal.Health = 0;
-                    }
-                    else if (animal.GetType() == otherAnimal.GetType())
-                    {
-                        // Increase the count if the neighbor is of the same type
-                        animal.SameTypeNeighborCount++;
-                    }
+                    animal.InteractWith(otherAnimal);
                 }
             }
         }
+    }
 
-        // If the animal's health reaches 0, remove it from the game field
+    private void Death(IAnimal animal)
+    {
         if (animal.Health <= 0)
         {
             _gameField[animal.X, animal.Y] = null;
             _animals.Remove(animal);
         }
     }
+
+    private void Birth(IAnimal animal)
+    {
+        if (animal.ConsecutiveInteractions == 3)
+        {
+            IAnimal newAnimal = Activator.CreateInstance(animal.GetType()) as IAnimal;
+            if (newAnimal != null)
+            {
+                // Find an empty cell for the new animal
+                int newX, newY;
+                do
+                {
+                    newX = random.Next(_fieldSize.Height);
+                    newY = random.Next(_fieldSize.Width);
+                } while (_gameField[newX, newY] != null);
+
+                newAnimal.X = newX;
+                newAnimal.Y = newY;
+                _gameField[newX, newY] = newAnimal;
+                _animals.Add(newAnimal);
+            }
+            animal.ConsecutiveInteractions = 0;
+        }
+    }
+
 
     /// <summary>
     /// Calculates the direction in which an animal should move based on its speed and vision range.

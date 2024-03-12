@@ -1,8 +1,5 @@
 ﻿using CodeLibrary.Animals;
 using CodeLibrary.Interfaces;
-using System;
-using System.Diagnostics.Metrics;
-using System.Reflection.Metadata;
 
 namespace CodeLibrary;
 
@@ -40,6 +37,7 @@ public class Game
     /// </summary>
     public async Task Run()
     {
+        int iteration = 0;
         while (true)
         {
             // Convert each row of the game field to a string and join them with newlines
@@ -75,12 +73,13 @@ public class Game
                 DisplayAnimalHealth();
                 // Wait for a second before the next iteration
                 await Task.Delay(1000);
+                iteration++;
             }
         }
     }
 
     /// <summary>
-    /// Adds an animal to the game field based on user input.
+    /// ADD DESCRIPTION
     /// </summary>
     /// <param name="animal">The character representing the type of animal to be added ('A' for Antelope, 'L' for Lion).</param>
     private async Task AddAnimal(char animal)

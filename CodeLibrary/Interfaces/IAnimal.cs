@@ -7,6 +7,10 @@ public interface IAnimal
     int Speed { get; init; }
     int VisionRange { get; init; }
     double Health { get; set; }
-    int SameTypeNeighborCount { get; set; }
-    IAnimal? LastNeighbor { get; set; }
+    IAnimal? LastNeighbour { get; set; }
+    int ConsecutiveInteractions { get; set; }
+
+    void Move(int newX, int newY);
+    void DecreaseHealth(double amount);
+    void InteractWith(IAnimal otherAnimal);
 }
