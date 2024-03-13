@@ -30,11 +30,13 @@ public class Antelope : IAnimal
             if (LastNeighbour == otherAnimal)
             {
                 ConsecutiveInteractions++;
+                Console.WriteLine($"Antelope {this} interacted with Antelope {otherAnimal}. Consecutive interactions: {ConsecutiveInteractions}");
             }
             else
             {
                 LastNeighbour = otherAnimal;
                 ConsecutiveInteractions = 1;
+                Console.WriteLine($"Antelope {this} started interacting with Antelope {otherAnimal}");
             }
         }
     }

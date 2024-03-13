@@ -31,6 +31,7 @@ public class Lion : IAnimal
             Health += 1;
             // Decrease the antelope's health to 0
             otherAnimal.Health = 0;
+            Console.WriteLine($"Lion {this} interacted with Antelope {otherAnimal}. Antelope's health is now {otherAnimal.Health}");
         }
         else if (otherAnimal is Lion && LastNeighbour == otherAnimal)
         {

@@ -54,18 +54,22 @@ public class GameEngine
             animal.Move(newX, newY);
             _gameField[animal.X, animal.Y] = animal;
         }
+    }
 
+    public void UpdateAnimalHealth(IAnimal animal)
+    {
         animal.DecreaseHealth(Constant.HealthDecreasePerMove);
         CheckNeighboringCells(animal);
+    }
 
+    public void CheckAnimalStatus(IAnimal animal)
+    {
         if (animal.Health <= 0)
         {
-            Death(animal);
+            RemoveAnimalOnDeath(animal);
             return;
         }
-        Birth(animal);
-        
-
+        CreateAnimalOnBirth(animal);
     }
 
     private void CheckNeighboringCells(IAnimal animal)
@@ -83,7 +87,7 @@ public class GameEngine
         }
     }
 
-    private void Death(IAnimal animal)
+    private void RemoveAnimalOnDeath(IAnimal animal)
     {
         if (animal.Health <= 0)
         {
@@ -92,7 +96,7 @@ public class GameEngine
         }
     }
 
-    private void Birth(IAnimal animal)
+    private void CreateAnimalOnBirth(IAnimal animal)
     {
         if (animal.ConsecutiveInteractions == 3)
         {
@@ -176,18 +180,9 @@ public class GameEngine
         return (newX, newY);
     }
 
-    public string DrawField()
-    {
-        return _fieldDisplayer.DrawField(_gameField, _fieldSize.Height, _fieldSize.Width);
-    }
+    public string DrawField() => _fieldDisplayer.DrawField(_gameField, _fieldSize.Height, _fieldSize.Width);
 
-    public IAnimal[,] GetGameField()
-    {
-        return _gameField;
-    }
+    public IAnimal[,] GetGameField() => _gameField;
 
-    public List<IAnimal> GetAnimals()
-    {
-        return _animals;
-    }
+    public List<IAnimal> GetAnimals() => _animals;
 }

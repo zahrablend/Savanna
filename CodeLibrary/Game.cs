@@ -11,7 +11,6 @@ public class Game
     private Random random;
     private readonly GameEngine gameEngine;
     private readonly FieldDisplayer fieldDisplayer;
-
     public Game()
     {
         gameField = new char[20, 100]; // Initialize the 2D array with the desired size
@@ -35,6 +34,7 @@ public class Game
     /// Once both the antelopes and lions reach a count of 10, the game starts. Each animal in the game is moved, and the updated state of the game field is displayed. 
     /// The method then waits for a second before the next iteration.
     /// </summary>
+    /// 
     public async Task Run()
     {
         int iteration = 0;
@@ -64,16 +64,28 @@ public class Game
                 foreach (var animal in animalsCopy)
                 {
                     gameEngine.MoveAnimal(animal);
+                    gameEngine.UpdateAnimalHealth(animal);
+                    gameEngine.CheckAnimalStatus(animal);
                 }
 
                 // Display the updated state of the game field
                 string updatedGameState = gameEngine.DrawField();
-                Console.Clear(); // Clear the console
+                Console.Clear();
                 Console.WriteLine(updatedGameState);
                 DisplayAnimalHealth();
-                // Wait for a second before the next iteration
                 await Task.Delay(1000);
                 iteration++;
+                if (Console.KeyAvailable)
+                {
+                    var key = await GetKeyPress();
+                    if (key == ConsoleKey.S)
+                    {
+                        Console.WriteLine("Game Over");
+                        DisplayLiveAnimalsCount();
+                        Console.WriteLine("Press Esc key to close application");
+                        break;
+                    }
+                }
             }
         }
     }
@@ -168,6 +180,25 @@ public class Game
             }
         }
     }
+    private void DisplayLiveAnimalsCount()
+    {
+        var animals = gameEngine.GetAnimals();
+        var liveAntelopes = animals.Count(a => a is Antelope && a.Health > 0);
+        var liveLions = animals.Count(a => a is Lion && a.Health > 0);
+
+        Console.WriteLine($"Live Antelopes: {liveAntelopes}");
+        Console.WriteLine($"Live Lions: {liveLions}");
+
+        if (liveAntelopes > 0 && liveLions == 0)
+        {
+            Console.WriteLine("Antelopes won");
+        }
+        else if (liveLions > 0 && liveAntelopes == 0)
+        {
+            Console.WriteLine("Lions won");
+        }
+    }
+
 }
 
 

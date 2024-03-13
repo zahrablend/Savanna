@@ -130,7 +130,7 @@ public class GameEngineTests
     [Theory]
     [InlineData(typeof(Antelope))]
     [InlineData(typeof(Lion))]
-    public void MoveAnimal_AnimalHealthZero_AnimalRemovedFromGame(Type animalType)
+    public void CheckAnimalStatus_AnimalHealthZero_AnimalRemovedFromGame(Type animalType)
     {
         // Arrange
         var animal = Activator.CreateInstance(animalType) as IAnimal;
@@ -148,7 +148,7 @@ public class GameEngineTests
     [Theory]
     [InlineData(typeof(Antelope))]
     [InlineData(typeof(Lion))]
-    public void MoveAnimal_TwoAnimalsOfSameTypeAreNeighboursForThreeConsecutiveIterations_NewAnimalOfSameTypeAddedToGame(Type animalType)
+    public void CheckAnimalStatus_TwoAnimalsOfSameTypeAreNeighboursForThreeConsecutiveIterations_NewAnimalOfSameTypeAddedToGame(Type animalType)
     {
         // Arrange
         var animal = Activator.CreateInstance(animalType) as IAnimal;
