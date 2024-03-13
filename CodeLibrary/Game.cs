@@ -37,7 +37,6 @@ public class Game
     /// 
     public async Task Run()
     {
-        int iteration = 0;
         while (true)
         {
             // Convert each row of the game field to a string and join them with newlines
@@ -63,9 +62,7 @@ public class Game
                 //Start Game: 
                 foreach (var animal in animalsCopy)
                 {
-                    gameEngine.MoveAnimal(animal);
-                    gameEngine.UpdateAnimalHealth(animal);
-                    gameEngine.CheckAnimalStatus(animal);
+                    gameEngine.AddAnimal(animal);
                 }
 
                 // Display the updated state of the game field
@@ -74,7 +71,6 @@ public class Game
                 Console.WriteLine(updatedGameState);
                 DisplayAnimalHealth();
                 await Task.Delay(1000);
-                iteration++;
                 if (Console.KeyAvailable)
                 {
                     var key = await GetKeyPress();
@@ -162,11 +158,6 @@ public class Game
 
         foreach (var animal in gameEngine.GetAnimals())
         {
-            // Ensure the health never goes below 0
-            if (animal.Health < 0)
-            {
-                animal.Health = 0;
-            }
 
             if (animal is Antelope && antelopeId <= antelopeCount)
             {
