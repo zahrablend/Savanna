@@ -42,9 +42,10 @@ public class GameEngine
 
         animal.X = x;
         animal.Y = y;
+        animal.Health = Constant.InitialHealth;
         _gameField[x, y] = animal;
         _animals.Add(animal);
-        animal.Health = Constant.InitialHealth;
+        //animal.Health = Constant.InitialHealth;
     }
 
     public virtual void MoveAnimal(IAnimal animal)
@@ -149,8 +150,12 @@ public class GameEngine
     private Dictionary<IAnimal, int> _consecutiveRounds = new();
     private void CreateAnimalOnBirth(IAnimal animal)
     {
-        foreach (var otherAnimal in _animals)
+        var newAnimals = new List<IAnimal>();
+
+        for (int index = 0; index < _animals.Count; index++)
         {
+            var otherAnimal = _animals[index];
+
             if (otherAnimal.GetType() == animal.GetType()
                 && AreNeighbours(animal, otherAnimal))
             {
@@ -166,7 +171,7 @@ public class GameEngine
                 if (_consecutiveRounds[animal] >= 3)
                 {
                     var newAnimal = (IAnimal)Activator.CreateInstance(animal.GetType());
-                    AddAnimal(newAnimal);
+                    newAnimals.Add(newAnimal);
                     _consecutiveRounds[animal] = 0;
                 }
             }
@@ -177,6 +182,11 @@ public class GameEngine
                     _consecutiveRounds[animal] = 0;
                 }
             }
+        }
+
+        for (int i = 0; i < newAnimals.Count; i++)
+        {
+            AddAnimal(newAnimals[i]);
         }
     }
 
