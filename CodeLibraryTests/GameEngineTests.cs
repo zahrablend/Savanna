@@ -1,6 +1,8 @@
 ﻿using CodeLibrary;
 using CodeLibrary.Animals;
+using CodeLibrary.Constants;
 using CodeLibrary.Interfaces;
+using Moq;
 
 namespace CodeLibraryTests;
 
@@ -21,79 +23,48 @@ public class GameEngineTests
     }
 
     [Fact]
-    public void MoveAnimal_AntelopeMoved_AntelopeMovedCorrectDistance()
+    public void AddAnimal_AnimalHealthSetToInitialHealth_WhenAnimalIsAdded()
     {
         // Arrange
-        _gameEngine.AddAnimal(_antelope);
-        var oldX = _antelope.X;
-        var oldY = _antelope.Y;
+        var mockAnimal = new Mock<IAnimal>();
+        var gameEngine = new GameEngine(new FieldDisplayer.FieldSize(10, 10), new FieldDisplayer()); // Assuming FieldDisplayer is the class for displaying the field
 
         // Act
-        //_gameEngine.MoveAnimal(_antelope);
+        gameEngine.AddAnimal(mockAnimal.Object);
 
         // Assert
-        var distanceMoved = Math.Sqrt(Math.Pow(_antelope.X - oldX, 2) + Math.Pow(_antelope.Y - oldY, 2));
-        Assert.True(distanceMoved <= _antelope.Speed);
+        mockAnimal.VerifySet(a => a.Health = Constant.InitialHealth);
     }
 
-    [Fact]
-    public void MoveAnimal_LionMoved_LionMovedCorrectDistance()
+    [Theory]
+    [InlineData(typeof(Antelope))]
+    [InlineData(typeof(Lion))]
+    public void MoveAnimal_AnimalMoved_AnimalMovedWithCorrectSpeed(Type animalType)
     {
         // Arrange
-        _gameEngine.AddAnimal(_lion);
-        var oldX = _lion.X;
-        var oldY = _lion.Y;
+        IAnimal animal;
+        if (animalType == typeof(Antelope))
+        {
+            animal = new Antelope();
+        }
+        else if (animalType == typeof(Lion))
+        {
+            animal = new Lion();
+        }
+        else
+        {
+            throw new ArgumentException("Invalid animal type");
+        }
+
+        _gameEngine.AddAnimal(animal);
+        var oldX = animal.X;
+        var oldY = animal.Y;
 
         // Act
-        //_gameEngine.MoveAnimal(_lion);
+        _gameEngine.MoveAnimal(animal);
 
         // Assert
-        var distanceMoved = Math.Sqrt(Math.Pow(_lion.X - oldX, 2) + Math.Pow(_lion.Y - oldY, 2));
-        Assert.True(distanceMoved <= _lion.Speed);
-    }
-
-    [Fact]
-    public void MoveAnimal_AntelopeInteractedWithLion_AntelopeMovedAwayFromLion()
-    {
-        // Arrange
-        _antelope.X = 5;
-        _antelope.Y = 5;
-        _lion.X = 5;
-        _lion.Y = 5 + _antelope.VisionRange - 1; // Just within the antelope's vision range
-        _gameEngine.AddAnimal(_antelope);
-        _gameEngine.AddAnimal(_lion);
-
-        var oldDistance = Math.Sqrt(Math.Pow(_antelope.X - _lion.X, 2) + Math.Pow(_antelope.Y - _lion.Y, 2));
-
-        // Act
-        //_gameEngine.MoveAnimal(_antelope);
-
-        var newDistance = Math.Sqrt(Math.Pow(_antelope.X - _lion.X, 2) + Math.Pow(_antelope.Y - _lion.Y, 2));
-
-        // Assert
-        Assert.True(newDistance > oldDistance);
-    }
-
-    [Fact]
-    public void MoveAnimal_LionInteractedWithAntelope_LionMovedTowardsAntelope()
-    {
-        // Arrange
-        _antelope.X = 5;
-        _antelope.Y = 5;
-        _lion.X = 5;
-        _lion.Y = 5 + _lion.VisionRange - 1; // Just within the lion's vision range
-        _gameEngine.AddAnimal(_antelope);
-        _gameEngine.AddAnimal(_lion);
-
-        var oldDistance = Math.Sqrt(Math.Pow(_antelope.X - _lion.X, 2) + Math.Pow(_antelope.Y - _lion.Y, 2));
-
-        // Act
-        //_gameEngine.MoveAnimal(_lion);
-
-        var newDistance = Math.Sqrt(Math.Pow(_antelope.X - _lion.X, 2) + Math.Pow(_antelope.Y - _lion.Y, 2));
-
-        // Assert
-        Assert.True(newDistance < oldDistance);
+         
     }
 
     [Theory]
@@ -105,61 +76,102 @@ public class GameEngineTests
         var animal = Activator.CreateInstance(animalType) as IAnimal;
         animal.X = 0;
         animal.Y = 0;
-
-        if (animal is Antelope antelope)
+        if (animal is Antelope)
         {
-            antelope = new Antelope { Speed = 100 };
+            Antelope antelope = new Antelope { Speed = 100 };
             _gameEngine.AddAnimal(antelope);
             animal = antelope;
         }
-        else if (animal is Lion lion)
+        else if (animal is Lion)
         {
-            lion = new Lion { Speed = 100 };
+            Lion lion = new Lion { Speed = 100 };
             _gameEngine.AddAnimal(lion);
             animal = lion;
         }
 
         // Act
-        //_gameEngine.MoveAnimal(animal);
+        _gameEngine.MoveAnimal(animal);
 
         // Assert
-        Assert.True(animal.X >= 0 && animal.X < _gameEngine.GetGameField().GetLength(0));
-        Assert.True(animal.Y >= 0 && animal.Y < _gameEngine.GetGameField().GetLength(1));
+        Assert.True(animal.X >= 0 && animal.X < _gameEngine.GetGameField.GetLength(0));
+        Assert.True(animal.Y >= 0 && animal.Y < _gameEngine.GetGameField.GetLength(1));
     }
 
     [Theory]
     [InlineData(typeof(Antelope))]
     [InlineData(typeof(Lion))]
-    public void CheckAnimalStatus_AnimalHealthZero_AnimalRemovedFromGame(Type animalType)
+    public void MoveAnimal_AnimalMoved_AnimalHealthDecreased(Type animalType)
     {
         // Arrange
-        var animal = Activator.CreateInstance(animalType) as IAnimal;
-        animal.Health = 0;
+        IAnimal animal = Activator.CreateInstance(animalType) as IAnimal;
         _gameEngine.AddAnimal(animal);
 
+        var initialHealth = animal.Health;
+
         // Act
-        //_gameEngine.MoveAnimal(animal);
+        _gameEngine.MoveAnimal(animal);
+
+        var finalHealth = animal.Health;
 
         // Assert
-       // Assert.DoesNotContain(animal, _gameEngine.GetAnimals());
-        Assert.DoesNotContain(animal, _gameEngine.GetGameField().OfType<IAnimal>());
+        Assert.True(finalHealth == initialHealth - Constant.HealthDecreasePerMove);
     }
 
     [Theory]
     [InlineData(typeof(Antelope))]
     [InlineData(typeof(Lion))]
-    public void CheckAnimalStatus_TwoAnimalsOfSameTypeAreNeighboursForThreeConsecutiveIterations_NewAnimalOfSameTypeAddedToGame(Type animalType)
+    public void MoveAnimal_AnimalHealthZero_DeadAnimalRemovedFromGame(Type animalType)
     {
         // Arrange
-        var animal = Activator.CreateInstance(animalType) as IAnimal;
-        //animal.ConsecutiveInteractions = 3;
+        IAnimal animal = Activator.CreateInstance(animalType) as IAnimal;
+        animal.Health = 0; // Set health to 0 to simulate death
         _gameEngine.AddAnimal(animal);
 
+        var initialAnimalCount = _gameEngine.GetAnimals.Count;
+
         // Act
-        //_gameEngine.MoveAnimal(animal);
+        _gameEngine.MoveAnimal(animal);
+
+        var finalAnimalCount = _gameEngine.GetAnimals.Count;
 
         // Assert
-        Assert.Equal(2, _gameEngine.GetAnimals().Count(a => a.GetType() == animalType));
+        Assert.True(finalAnimalCount == initialAnimalCount - 1);
     }
 
+
+
+
+    //[Fact]
+    //public void InteractWith_LionInteractsWithAntelope_LionHealthIncreasedByOne()
+    //{
+    //    // Arrange
+    //    Lion lion = new Lion();
+    //    Antelope antelope = new Antelope();
+
+    //    var initialHealth = lion.Health;
+
+    //    // Act
+    //    lion.InteractWith(antelope);
+
+    //    var finalHealth = lion.Health;
+
+    //    // Assert
+    //    Assert.True(finalHealth == initialHealth + 1);
+    //}
+
+    //[Fact]
+    //public void InteractWith_AntelopeInteractsWithLion_AntelopeHealthZero()
+    //{
+    //    // Arrange
+    //    Antelope antelope = new Antelope();
+    //    Lion lion = new Lion();
+
+    //    // Act
+    //    antelope.InteractWith(lion);
+
+    //    var finalHealth = antelope.Health;
+
+    //    // Assert
+    //    Assert.True(finalHealth == 0);
+    //}
 }

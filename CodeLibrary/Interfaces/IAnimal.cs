@@ -7,6 +7,4 @@ public interface IAnimal
     int Speed { get; init; }
     int VisionRange { get; init; }
     double Health { get; set; }
-
-    void InteractWith(IAnimal otherAnimal);
 }

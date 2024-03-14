@@ -49,24 +49,24 @@ public class Game
 
             if (antelopeCount < 10)
             {
-                await AddAnimal('A');
+                await AddAnimalInitialSetup('A');
             }
             else if (lionCount < 10)
             {
-                await AddAnimal('L');
+                await AddAnimalInitialSetup('L');
             }
             else
             {
                 // Create a copy of the animals list
-                var animalsCopy = new List<IAnimal>(gameEngine.GetAnimals());
+                var animalsCopy = new List<IAnimal>(gameEngine.GetAnimals);
                 //Start Game: 
                 foreach (var animal in animalsCopy)
                 {
-                    gameEngine.AddAnimal(animal);
+                    gameEngine.MoveAnimal(animal);
                 }
 
                 // Display the updated state of the game field
-                string updatedGameState = gameEngine.DrawField();
+                string updatedGameState = gameEngine.DrawField;
                 Console.Clear();
                 Console.WriteLine(updatedGameState);
                 DisplayAnimalHealth();
@@ -90,7 +90,7 @@ public class Game
     /// ADD DESCRIPTION
     /// </summary>
     /// <param name="animal">The character representing the type of animal to be added ('A' for Antelope, 'L' for Lion).</param>
-    private async Task AddAnimal(char animal)
+    private async Task AddAnimalInitialSetup(char animal)
     {
         if ((animal == 'A' && antelopeCount >= 10) || (animal == 'L' && lionCount >= 10))
         {
@@ -156,24 +156,23 @@ public class Game
         int antelopeId = 1;
         int lionId = 1;
 
-        foreach (var animal in gameEngine.GetAnimals())
+        foreach (var animal in gameEngine.GetAnimals)
         {
-
             if (animal is Antelope && antelopeId <= antelopeCount)
             {
-                Console.WriteLine(animal.Health > 0 ? $"Antelope {antelopeId}: health {animal.Health}" : $"Antelope {antelopeId}: died");
+                Console.WriteLine(animal.Health > 0 ? $"Antelope {antelopeId}: health {animal.Health}" : $"Antelope {antelopeId}: health {animal.Health} - died");
                 antelopeId++;
             }
             else if (animal is Lion && lionId <= lionCount)
             {
-                Console.WriteLine(animal.Health > 0 ? $"Lion {lionId}: health {animal.Health}" : $"Lion {lionId}: died");
+                Console.WriteLine(animal.Health > 0 ? $"Lion {lionId}: health {animal.Health}" : $"Lion {lionId}: health {animal.Health} -  died");
                 lionId++;
             }
         }
     }
     private void DisplayLiveAnimalsCount()
     {
-        var animals = gameEngine.GetAnimals();
+        var animals = gameEngine.GetAnimals;
         var liveAntelopes = animals.Count(a => a is Antelope && a.Health > 0);
         var liveLions = animals.Count(a => a is Lion && a.Health > 0);
 

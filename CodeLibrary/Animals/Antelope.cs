@@ -1,4 +1,5 @@
 ﻿using CodeLibrary.Interfaces;
+using System;
 
 namespace CodeLibrary.Animals;
 
@@ -11,12 +12,4 @@ public class Antelope : IAnimal
     public double Health { get; set; }
 
     public Antelope() { }
-
-    public void InteractWith(IAnimal otherAnimal)
-    {
-        if (otherAnimal is Lion)
-        {
-            this.Health = 0;
-        }
-    }
 }

@@ -12,6 +12,10 @@ public class GameEngine
     private readonly FieldDisplayer _fieldDisplayer;
     private static readonly Random random = new();
 
+    public GameEngine()
+    {    
+    }
+
     public GameEngine(FieldDisplayer.FieldSize fieldSize, FieldDisplayer fieldDisplayer)
     {
         _fieldSize = fieldSize;
@@ -43,7 +47,7 @@ public class GameEngine
         animal.Health = Constant.InitialHealth;
     }
 
-    public void MoveAnimal(IAnimal animal)
+    public virtual void MoveAnimal(IAnimal animal)
     {
         var (directionX, directionY) = GetMovementDirection(animal);
         var (newX, newY) = GetNewPosition(animal, directionX, directionY);
@@ -58,6 +62,14 @@ public class GameEngine
 
         animal.Health -= Constant.HealthDecreasePerMove;
 
+        InteractWith(animal);
+        CreateAnimalOnBirth(animal);
+        RemoveAnimalOnDeath(animal);
+
+    }
+
+    private void InteractWith(IAnimal animal)
+    {
         for (int i = Math.Max(0, animal.X - 1); i <= Math.Min(_fieldSize.Height - 1, animal.X + 1); i++)
         {
             for (int j = Math.Max(0, animal.Y - 1); j <= Math.Min(_fieldSize.Width - 1, animal.Y + 1); j++)
@@ -73,16 +85,8 @@ public class GameEngine
                 }
             }
         }
-
-        RemoveAnimalOnDeath(animal);
-        CreateAnimalOnBirth(animal);
     }
 
-    /// <summary>
-    /// Calculates the direction in which an animal should move based on its speed and vision range.
-    /// </summary>
-    /// <param name="animal">The animal for which to calculate the movement direction.</param>
-    /// <returns>A tuple of integers representing the movement direction on the x and y axes.</returns>
     private (int directionX, int directionY) GetMovementDirection(IAnimal animal)
     {
         int directionX = random.Next(-animal.Speed, animal.Speed + 1);
@@ -94,16 +98,13 @@ public class GameEngine
             for (int j = Math.Max(0, animal.Y - animal.VisionRange); j <= Math.Min(_fieldSize.Width - 1, animal.Y + animal.VisionRange); j++)
             {
                 var otherAnimal = _gameField[i, j];
-                if (otherAnimal != null && otherAnimal.GetType() != animal.GetType())
+                if (otherAnimal != null && otherAnimal.GetType() !=  animal.GetType())
                 {
-                    // If the animal is an Antelope and it sees a Lion, it moves away
                     if (animal is Antelope && otherAnimal is Lion)
                     {
                         directionX = animal.X > otherAnimal.X ? animal.Speed : -animal.Speed;
                         directionY = animal.Y > otherAnimal.Y ? animal.Speed : -animal.Speed;
                     }
-
-                    // If the animal is a Lion and it sees an Antelope, it moves towards it
                     else if (animal is Lion && otherAnimal is Antelope)
                     {
                         directionX = animal.X < otherAnimal.X ? animal.Speed : -animal.Speed;
@@ -112,7 +113,6 @@ public class GameEngine
                 }
             }
         }
-
         return (directionX, directionY);
     }
 
@@ -125,8 +125,8 @@ public class GameEngine
     /// <returns>A tuple of integers representing the new position on the x and y axes.</returns>
     private (int newX, int newY) GetNewPosition(IAnimal animal, int directionX, int directionY)
     {
-        int newX = (animal.X + directionX) % _fieldSize.Height;
-        int newY = (animal.Y + directionY) % _fieldSize.Width;
+        int newX = (animal.X + directionX);
+        int newY = (animal.Y + directionY);
 
         // Ensure the new position is within the game field boundaries
         if (newX < 0) newX = 0;
@@ -149,12 +149,10 @@ public class GameEngine
     private Dictionary<IAnimal, int> _consecutiveRounds = new();
     private void CreateAnimalOnBirth(IAnimal animal)
     {
-        CheckNeighboringCells(animal);
-
         foreach (var otherAnimal in _animals)
         {
-            if (otherAnimal.GetType() == animal.GetType() 
-                && AreNeighbors(animal, otherAnimal))
+            if (otherAnimal.GetType() == animal.GetType()
+                && AreNeighbours(animal, otherAnimal))
             {
                 if (_consecutiveRounds.ContainsKey(animal))
                 {
@@ -174,46 +172,21 @@ public class GameEngine
             }
             else
             {
-                _consecutiveRounds[animal] = 0;
-            }
-        }
-    }
-
-
-    //public void CheckAnimalStatus(IAnimal animal)
-    //{
-    //    if (animal.Health < 0)
-    //    {
-    //        RemoveAnimalOnDeath(animal);
-    //        return;
-    //    }
-    //    CreateAnimalOnBirth(animal);
-    //}
-
-    private void CheckNeighboringCells(IAnimal animal)
-    {
-        for (int i = Math.Max(0, animal.X - 1); i <= Math.Min(_fieldSize.Height - 1, animal.X + 1); i++)
-        {
-            for (int j = Math.Max(0, animal.Y - 1); j <= Math.Min(_fieldSize.Width - 1, animal.Y + 1); j++)
-            {
-                var otherAnimal = _gameField[i, j];
-                if (otherAnimal != null)
+                if (_consecutiveRounds.ContainsKey(animal))
                 {
-                    animal.InteractWith(otherAnimal);
+                    _consecutiveRounds[animal] = 0;
                 }
             }
         }
     }
 
-    private bool AreNeighbors(IAnimal animal1, IAnimal animal2)
+    private bool AreNeighbours(IAnimal animal1, IAnimal animal2)
     {
         return Math.Abs(animal1.X - animal2.X) <= 1 
             && Math.Abs(animal1.Y - animal2.Y) <= 1;
     }
 
-    public string DrawField() => _fieldDisplayer.DrawField(_gameField, _fieldSize.Height, _fieldSize.Width);
-
-    public IAnimal[,] GetGameField() => _gameField;
-
-    public List<IAnimal> GetAnimals() => _animals;
+    public string DrawField => _fieldDisplayer.DrawField(_gameField, _fieldSize.Height, _fieldSize.Width);
+    public List<IAnimal> GetAnimals => _animals;
+    public IAnimal[,] GetGameField => _gameField;
 }
