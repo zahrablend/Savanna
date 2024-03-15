@@ -2,12 +2,13 @@
 
 namespace CodeLibrary.GameEngine;
 
-public  class AnimalCreator
+public class AnimalCreator
 {
     private List<IAnimal> _animals;
     private GameLogicOrchestrator _logic;
+    private Dictionary<(IAnimal, IAnimal), int> _consecutiveRounds = new();
 
-    public AnimalCreator( GameLogicOrchestrator logic)
+    public AnimalCreator(GameLogicOrchestrator logic)
     {
         _logic = logic;
         _animals = new List<IAnimal>();
@@ -17,47 +18,42 @@ public  class AnimalCreator
     {
         _animals = animals;
     }
-
-    private Dictionary<IAnimal, int> _consecutiveRounds = new();
-    public void CreateAnimalOnBirth(IAnimal animal)
+    
+    public void CreateAnimalOnBirth()
     {
-        var newAnimals = new List<IAnimal>();
-
-        for (int index = 0; index < _animals.Count; index++)
+        for (int i = 0; i < _animals.Count; i++)
         {
-            var otherAnimal = _animals[index];
-
-            if (otherAnimal.GetType() == animal.GetType()
-                && AreNeighbours(animal, otherAnimal))
+            for (int j = i + 1; j < _animals.Count; j++)
             {
-                if (_consecutiveRounds.ContainsKey(animal))
+                var animal1 = _animals[i];
+                var animal2 = _animals[j];
+
+                if (animal1.GetType() == animal2.GetType() && AreNeighbours(animal1, animal2))
                 {
-                    _consecutiveRounds[animal]++;
+                    var pair = (animal1, animal2);
+
+                    if (_consecutiveRounds.ContainsKey(pair))
+                    {
+                        _consecutiveRounds[pair]++;
+                    }
+                    else
+                    {
+                        _consecutiveRounds[pair] = 1;
+                    }
+
+                    if (_consecutiveRounds[pair] >= 3)
+                    {
+                        var newAnimal = (IAnimal)Activator.CreateInstance(animal1.GetType());
+                        _logic.AddAnimal(newAnimal);
+                        _consecutiveRounds[pair] = 0;
+                    }
                 }
                 else
                 {
-                    _consecutiveRounds[animal] = 1;
-                }
-
-                if (_consecutiveRounds[animal] >= 3)
-                {
-                    var newAnimal = (IAnimal)Activator.CreateInstance(animal.GetType());
-                    newAnimals.Add(newAnimal);
-                    _consecutiveRounds[animal] = 0;
+                    _consecutiveRounds.Remove((animal1, animal2));
+                    _consecutiveRounds.Remove((animal2, animal1));
                 }
             }
-            else
-            {
-                if (_consecutiveRounds.ContainsKey(animal))
-                {
-                    _consecutiveRounds[animal] = 0;
-                }
-            }
-        }
-
-        for (int i = 0; i < newAnimals.Count; i++)
-        {
-            _logic.AddAnimal(newAnimals[i]);
         }
     }
 
@@ -67,3 +63,4 @@ public  class AnimalCreator
             && Math.Abs(animal1.Y - animal2.Y) <= 1;
     }
 }
+

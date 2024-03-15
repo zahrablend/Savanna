@@ -2,10 +2,10 @@
 
 public class AnimalMoverTests
 {
-    private AnimalMover _animalMover;
-    private IAnimal[,] _gameField;
-    private FieldDisplayer.FieldSize _fieldSize;
-    private Mock<IAnimal> _animalMock;
+    private readonly AnimalMover _animalMover;
+    private readonly IAnimal[,] _gameField;
+    private readonly FieldDisplayer.FieldSize _fieldSize;
+    private readonly Mock<IAnimal> _animalMock;
 
     public AnimalMoverTests()
     {

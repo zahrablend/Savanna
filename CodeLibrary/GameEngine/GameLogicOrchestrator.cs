@@ -1,18 +1,18 @@
 ﻿using CodeLibrary.Constants;
-using CodeLibrary.GameEngine;
 using CodeLibrary.Interfaces;
 
-namespace CodeLibrary;
+namespace CodeLibrary.GameEngine;
 
 public class GameLogicOrchestrator
 {
-    private IAnimal?[,] _gameField; 
-    private List<IAnimal> _animals; 
+    private IAnimal?[,] _gameField;
+    private List<IAnimal> _animals;
     private readonly FieldDisplayer.FieldSize _fieldSize;
     private readonly FieldDisplayer _fieldDisplayer;
     private AnimalMover _animalMover;
     private HealthMetricCounter _healthMetricCounter;
     private AnimalRemover _animalRemover;
+    private AnimalCreator _animalCreator;
 
     public GameLogicOrchestrator() { }
 
@@ -27,6 +27,7 @@ public class GameLogicOrchestrator
         _animalMover = new AnimalMover(_gameField, fieldSize);
         _healthMetricCounter = new HealthMetricCounter(_gameField, fieldSize);
         _animalRemover = new AnimalRemover(_gameField, _animals);
+        _animalCreator = new AnimalCreator(this);
     }
 
     public virtual void AddAnimal(IAnimal animal)
@@ -54,6 +55,7 @@ public class GameLogicOrchestrator
         _healthMetricCounter.DecreaseHealth(animal);
         _healthMetricCounter.InteractWith(animal);
         _animalRemover.RemoveAnimalOnDeath(animal);
+        _animalCreator.CreateAnimalOnBirth();
     }
 
     public string DrawField => _fieldDisplayer.DrawField(_gameField, _fieldSize.Height, _fieldSize.Width);

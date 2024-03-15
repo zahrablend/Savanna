@@ -1,18 +1,9 @@
 ﻿namespace CodeLibraryTests;
 
-public class TestAnimal : IAnimal
-{
-    public int X { get; set; }
-    public int Y { get; set; }
-    public int Speed { get; init; }
-    public int VisionRange { get; init; }
-    public double Health { get; set; }
-}
-
 public class AnimalCreatorTests
 {
-    private Mock<GameLogicOrchestrator> _logicMock;
-    private AnimalCreator _animalCreator;
+    private readonly Mock<GameLogicOrchestrator> _logicMock;
+    private readonly AnimalCreator _animalCreator;
 
     public AnimalCreatorTests()
     {
@@ -21,20 +12,20 @@ public class AnimalCreatorTests
     }
 
     [Fact]
-    public void CreateAnimalOnBirth_ShouldAddNewAnimalWhenTwoAnimalsOfSameTypeAreNeighboursForThreeConsecutiveRounds()
+    public void CreateAnimalOnBirth_TwoAnimalsOfSameTypeAreNeighboursForThreeConsecutiveRounds_AddNewAnimal()
     {
         // Arrange
-        var animal1 = new TestAnimal { X = 5, Y = 5, Speed = 0 };
-        var animal2 = new TestAnimal { X = 6, Y = 5, Speed = 0 };
+        var animal1 = new Antelope { X = 5, Y = 5 };
+        var animal2 = new Antelope { X = 6, Y = 5 };
+        _animalCreator.SetAnimals(new List<IAnimal> { animal1, animal2 });
 
-        // Act & Assert
+        // Act
         for (int i = 0; i < 3; i++)
         {
-            _animalCreator.CreateAnimalOnBirth(animal1);
-            _animalCreator.CreateAnimalOnBirth(animal2);
+            _animalCreator.CreateAnimalOnBirth();
         }
 
-        // Verify that AddAnimal was called once (a new animal was added)
+        // Assert
         _logicMock.Verify(l => l.AddAnimal(It.IsAny<IAnimal>()), Times.Once);
     }
 }
