@@ -1,9 +1,10 @@
-﻿using CodeLibrary.GameEngine;
+﻿using CodeLibrary.Constants;
+using CodeLibrary.GameEngine;
 using CodeLibrary.Interfaces;
 
 namespace CodeLibrary;
 
-public class GameLogic
+public class GameLogicOrchestrator
 {
     private IAnimal?[,] _gameField; 
     private List<IAnimal> _animals; 
@@ -12,26 +13,39 @@ public class GameLogic
     private AnimalMover _animalMover;
     private HealthMetricCounter _healthMetricCounter;
     private AnimalRemover _animalRemover;
-    public GameLogic(FieldDisplayer.FieldSize fieldSize, FieldDisplayer fieldDisplayer)
+
+    public GameLogicOrchestrator() { }
+
+    public GameLogicOrchestrator(FieldDisplayer.FieldSize fieldSize, FieldDisplayer fieldDisplayer)
     {
         _fieldSize = fieldSize;
         _gameField = new IAnimal[_fieldSize.Height, _fieldSize.Width];
         _animals = new List<IAnimal>();
         _fieldDisplayer = fieldDisplayer;
-        _animalMover = new AnimalMover(_gameField, _fieldSize);
-        _healthMetricCounter = new HealthMetricCounter(_gameField, _fieldSize);
+
+        // Initialize the objects
+        _animalMover = new AnimalMover(_gameField, fieldSize);
+        _healthMetricCounter = new HealthMetricCounter(_gameField, fieldSize);
         _animalRemover = new AnimalRemover(_gameField, _animals);
     }
 
-    public GameLogic(FieldDisplayer.FieldSize fieldSize, FieldDisplayer fieldDisplayer, AnimalMover animalMover, HealthMetricCounter healthMetricCounter, AnimalRemover animalRemover)
+    public void AddAnimal(IAnimal animal)
     {
-        _fieldSize = fieldSize;
-        _gameField = new IAnimal[_fieldSize.Height, _fieldSize.Width];
-        _animals = new List<IAnimal>();
-        _fieldDisplayer = fieldDisplayer;
-        _animalMover = animalMover;
-        _healthMetricCounter = healthMetricCounter;
-        _animalRemover = animalRemover;
+        int x;
+        int y;
+
+        do
+        {
+            x = new Random().Next(_fieldSize.Height);
+            y = new Random().Next(_fieldSize.Width);
+        }
+        while (_gameField[x, y] != null);
+
+        animal.X = x;
+        animal.Y = y;
+        animal.Health = Constant.InitialHealth;
+        _gameField[x, y] = animal;
+        _animals.Add(animal);
     }
 
     public void PlayGame(IAnimal animal)

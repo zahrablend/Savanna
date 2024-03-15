@@ -5,11 +5,11 @@ namespace CodeLibrary.GameEngine;
 public  class AnimalCreator
 {
     private List<IAnimal> _animals;
-    private AnimalAdder _animalAdder;
+    private GameLogicOrchestrator _logic;
 
-    public AnimalCreator(AnimalAdder animalAdder)
+    public AnimalCreator( GameLogicOrchestrator logic)
     {
-        _animalAdder = animalAdder;
+        _logic = logic;
     }
 
     private Dictionary<IAnimal, int> _consecutiveRounds = new();
@@ -51,7 +51,7 @@ public  class AnimalCreator
 
         for (int i = 0; i < newAnimals.Count; i++)
         {
-            _animalAdder.AddAnimal(newAnimals[i]);
+            _logic.AddAnimal(newAnimals[i]);
         }
     }
 
