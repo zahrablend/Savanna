@@ -13,6 +13,10 @@ public class AnimalRemover
         _animals = animals;
     }
 
+    /// <summary>
+    /// If animals health is zero or less, removes the specified animal from the game field and animals list.
+    /// </summary>
+    /// <param name="animal"></param>
     public void RemoveAnimalOnDeath(IAnimal animal)
     {
         if (animal.Health <= 0)

@@ -12,8 +12,12 @@ public class Game
     private Random _random;
     private readonly GameLogicOrchestrator _logic;
     private readonly FieldDisplayer _fieldDisplayer;
-    private List<IAnimal> _animals;
 
+    /// <summary>
+    /// Initializes a new instance of the Game class.
+    /// Sets up the game field, initializes counts for antelopes and lions, 
+    /// creates instances of FieldDisplayer and GameLogicOrchestrator.
+    /// </summary>
     public Game()
     {
         _gameField = new char[20, 100];
@@ -29,7 +33,6 @@ public class Game
         _random = new Random();
         _fieldDisplayer = new FieldDisplayer();
         _logic = new GameLogicOrchestrator(new FieldDisplayer.FieldSize(20,100), _fieldDisplayer);
-        _animals = new List<IAnimal>();
     }
 
     /// <summary>
@@ -90,6 +93,11 @@ public class Game
         }
     }
 
+    /// <summary>
+    /// Asynchronously adds an animal to the game field during the initial setup.
+    /// The user can choose to add the animal by pressing a key, or skip to the next step by pressing 'S'.
+    /// </summary>
+    /// <param name="animal">The character representing the type of animal to add ('A' for Antelope, 'L' for Lion).</param>
     private async Task AddAnimalInitialSetup(char animal)
     {
         if ((animal == 'A' && _antelopeCount >= 10) || (animal == 'L' && _lionCount >= 10))
@@ -151,6 +159,11 @@ public class Game
         }
     }
 
+    /// <summary>
+    /// Displays the health status of each Antelope and Lion in the game.
+    /// For each animal, it prints the animal's type, ID, and current health.
+    /// If an animal's health is zero or less, it also prints that the animal has died.
+    /// </summary>
     private void DisplayAnimalHealth()
     {
         int antelopeId = 1;
@@ -170,6 +183,11 @@ public class Game
             }
         }
     }
+
+    /// <summary>
+    /// Displays the count of live Antelopes and Lions in the game.
+    /// If only Antelopes or only Lions are alive, declares them as the winner.
+    /// </summary>
     private void DisplayLiveAnimalsCount()
     {
         var animals = _logic.GetAnimals;

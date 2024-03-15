@@ -14,6 +14,12 @@ public class AnimalMover
         _gameField = gameField;
         _fieldSize = fieldSize;
     }
+
+    /// <summary>
+    /// Moves the specified animal to a new position in the game field.
+    /// The new position is determined based on the animal's movement direction.
+    /// If the new position is not occupied by another animal, the animal is moved to the new position.    /// </summary>
+    /// <param name="animal">The animal to move.</param>
     public void MoveAnimal(IAnimal animal)
     {
         var (directionX, directionY) = GetMovementDirection(animal);
