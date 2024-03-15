@@ -29,7 +29,7 @@ public class GameLogicOrchestrator
         _animalRemover = new AnimalRemover(_gameField, _animals);
     }
 
-    public void AddAnimal(IAnimal animal)
+    public virtual void AddAnimal(IAnimal animal)
     {
         int x;
         int y;

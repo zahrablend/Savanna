@@ -15,7 +15,7 @@ public class AnimalRemover
 
     public void RemoveAnimalOnDeath(IAnimal animal)
     {
-        if (animal.Health < 0)
+        if (animal.Health <= 0)
         {
             _gameField[animal.X, animal.Y] = null;
             _animals.Remove(animal);

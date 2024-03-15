@@ -10,6 +10,12 @@ public  class AnimalCreator
     public AnimalCreator( GameLogicOrchestrator logic)
     {
         _logic = logic;
+        _animals = new List<IAnimal>();
+    }
+
+    public void SetAnimals(List<IAnimal> animals)
+    {
+        _animals = animals;
     }
 
     private Dictionary<IAnimal, int> _consecutiveRounds = new();
