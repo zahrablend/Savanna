@@ -206,7 +206,6 @@ public class Game
             Console.WriteLine("Lions won");
         }
     }
-
 }
 
 
