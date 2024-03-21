@@ -1,4 +1,6 @@
 ﻿using CodeLibrary.Animals;
+using CodeLibrary.Constants;
+using CodeLibrary.Factories;
 using CodeLibrary.GameEngine;
 using CodeLibrary.Interfaces;
 
@@ -7,19 +9,21 @@ namespace CodeLibrary;
 public class Game
 {
     private char[,] _gameField;
-    private int _antelopeCount;
-    private int _lionCount;
     private Random _random;
     private readonly GameLogicOrchestrator _logic;
     private readonly FieldDisplayer _fieldDisplayer;
+    private readonly IGameUI _gameUI;
+    private readonly Dictionary<char, (IAnimalFactory factory, int count)> _animalFactories;
+    private readonly Queue<char> _animalOrder;
 
     /// <summary>
     /// Initializes a new instance of the Game class.
     /// Sets up the game field, initializes counts for antelopes and lions, 
     /// creates instances of FieldDisplayer and GameLogicOrchestrator.
     /// </summary>
-    public Game()
+    public Game(IGameUI gameUI)
     {
+        _gameUI = gameUI;
         _gameField = new char[20, 100];
         for (int i = 0; i < _gameField.GetLength(0); i++)
         {
@@ -28,11 +32,19 @@ public class Game
                 _gameField[i, j] = '.';
             }
         }
-        _antelopeCount = 0;
-        _lionCount = 0;
         _random = new Random();
         _fieldDisplayer = new FieldDisplayer();
-        _logic = new GameLogicOrchestrator(new FieldDisplayer.FieldSize(20,100), _fieldDisplayer);
+        _fieldDisplayer.Size = new FieldDisplayer.FieldSize(20,100);
+        _logic = new GameLogicOrchestrator(_fieldDisplayer, gameUI);
+        // Initialize the animal factories
+        _animalFactories = new Dictionary<char, (IAnimalFactory factory, int count)>
+        {
+            { new Antelope().Symbol, (new AntelopeFactory(), 0) },
+            { new Lion().Symbol, (new LionFactory(), 0) }
+        };
+        _animalOrder = new Queue<char>();
+        _animalOrder.Enqueue(new Antelope().Symbol);
+        _animalOrder.Enqueue(new Lion().Symbol);
     }
 
     /// <summary>
@@ -46,21 +58,16 @@ public class Game
     {
         while (true)
         {
-            // Convert each row of the game field to a string and join them with newlines
             string gameState = string.Join("\n", Enumerable.Range(0, _gameField.GetLength(0))
-                .Select(i => new string(Enumerable.Range(0, _gameField.GetLength(1))
-                .Select(j => _gameField[i, j]).ToArray())));
+        .Select(i => new string(Enumerable.Range(0, _gameField.GetLength(1))
+        .Select(j => _gameField[i, j]).ToArray())));
 
-            Console.Clear(); // Clear the console
-            Console.WriteLine(gameState);
+            _gameUI.Clear();
+            _gameUI.Display(gameState);
 
-            if (_antelopeCount < 10)
+            if (_animalOrder.Count > 0)
             {
-                await AddAnimalInitialSetup('A');
-            }
-            else if (_lionCount < 10)
-            {
-                await AddAnimalInitialSetup('L');
+                await AddAnimalInitialSetup();
             }
             else
             {
@@ -74,20 +81,18 @@ public class Game
 
                 // Display the updated state of the game field
                 string updatedGameState = _logic.DrawField;
-                Console.Clear();
-                Console.WriteLine(updatedGameState);
+                _gameUI.Clear();
+                _gameUI.Display(updatedGameState);
                 DisplayAnimalHealth();
                 await Task.Delay(1000);
-                if (Console.KeyAvailable)
+
+                var key = await _gameUI.GetKeyPress();
+                if (key.HasValue && key.Value == ConsoleKey.S)
                 {
-                    var key = await GetKeyPress();
-                    if (key == ConsoleKey.S)
-                    {
-                        Console.WriteLine("Game Over");
-                        DisplayLiveAnimalsCount();
-                        Console.WriteLine("Press Esc key to close application");
-                        break;
-                    }
+                    _gameUI.Display(Constant.GameOverMessage);
+                    DisplayLiveAnimalsCount();
+                    _gameUI.Display(Constant.CloseAppMessage);
+                    break;
                 }
             }
         }
@@ -98,16 +103,25 @@ public class Game
     /// The user can choose to add the animal by pressing a key, or skip to the next step by pressing 'S'.
     /// </summary>
     /// <param name="animal">The character representing the type of animal to add ('A' for Antelope, 'L' for Lion).</param>
-    private async Task AddAnimalInitialSetup(char animal)
+    private async Task<ConsoleKey?> AddAnimalInitialSetup()
     {
-        if ((animal == 'A' && _antelopeCount >= 10) || (animal == 'L' && _lionCount >= 10))
+        if (_animalOrder.Count == 0)
         {
-            return;
+            return null;
         }
 
-        Console.WriteLine($"Add {animal} to game field. Press {animal} to continue or S to skip.");
-        ConsoleKey key = await GetKeyPress();
-        if (key.ToString().ToUpper() == animal.ToString())
+        char animalSymbol = _animalOrder.Peek();
+        var (animalFactory, count) = _animalFactories[animalSymbol];
+
+        if (count >= 10)
+        {
+            _animalOrder.Dequeue();
+            return await AddAnimalInitialSetup();
+        }
+
+        _gameUI.Display($"Add {animalSymbol} to game field. Press {animalSymbol} to continue or S to skip.");
+        ConsoleKey? key = await _gameUI.GetKeyPress();
+        if (key.HasValue && key.Value.ToString().ToUpper() == animalSymbol.ToString())
         {
             int indexX, indexY;
             do
@@ -115,48 +129,21 @@ public class Game
                 indexX = _random.Next(_gameField.GetLength(0));
                 indexY = _random.Next(_gameField.GetLength(1));
             } while (_gameField[indexX, indexY] != '.');
-            _gameField[indexX, indexY] = animal;
-            if (animal == 'A')
-            {
-                _antelopeCount++;
-            }
-            else if (animal == 'L')
-            {
-                _lionCount++;
-            }
+           
+            _gameField[indexX, indexY] = animalSymbol;
 
-            IAnimal gameAnimal = animal == 'A' ? new Antelope() : new Lion();
+            IAnimal gameAnimal = animalFactory.Create();
             gameAnimal.X = indexX;
             gameAnimal.Y = indexY;
             _logic.AddAnimal(gameAnimal);
-        }
-        else if (key == ConsoleKey.S && ((animal == 'A' && _antelopeCount >= 2) || (animal == 'L' && _lionCount >= 2)))
-        {
-            if (animal == 'A')
-            {
-                _antelopeCount = 10; 
-            }
-            else if (animal == 'L')
-            {
-                _lionCount = 10;
-            }
-        }
-    }
 
-    private static async Task<ConsoleKey> GetKeyPress()
-    {
-        while (true)
-        {
-            if (Console.KeyAvailable)
-            {
-                var key = Console.ReadKey(true).Key;
-                if (key == ConsoleKey.A || key == ConsoleKey.S || key == ConsoleKey.L)
-                {
-                    return key;
-                }
-            }
-            await Task.Delay(100);
+            _animalFactories[animalSymbol] = (animalFactory, count + 1);
         }
+        else if (key.HasValue && key.Value == ConsoleKey.S && count >= 2)
+        {
+            _animalOrder.Dequeue();
+        }
+        return key;
     }
 
     /// <summary>
@@ -166,21 +153,19 @@ public class Game
     /// </summary>
     private void DisplayAnimalHealth()
     {
-        int antelopeId = 1;
-        int lionId = 1;
+        var animalId = new Dictionary<string, int>();
 
         foreach (var animal in _logic.GetAnimals)
         {
-            if (animal is Antelope && antelopeId <= _antelopeCount)
+            if (!animalId.TryGetValue(animal.Name, out int value))
             {
-                Console.WriteLine(animal.Health > 0 ? $"Antelope {antelopeId}: health {animal.Health}" : $"Antelope {antelopeId}: health {animal.Health} - died");
-                antelopeId++;
+                value = 1;
+                animalId[animal.Name] = value;
             }
-            else if (animal is Lion && lionId <= _lionCount)
-            {
-                Console.WriteLine(animal.Health > 0 ? $"Lion {lionId}: health {animal.Health}" : $"Lion {lionId}: health {animal.Health} -  died");
-                lionId++;
-            }
+            _gameUI.Display(animal.Health > 0 
+                ? $"{animal.Name} {value}: health {animal.Health}" 
+                : $"{animal.Name} {value}: health {animal.Health} - died");
+            animalId[animal.Name] = ++value;
         }
     }
 
@@ -190,20 +175,29 @@ public class Game
     /// </summary>
     private void DisplayLiveAnimalsCount()
     {
-        var animals = _logic.GetAnimals;
-        var liveAntelopes = animals.Count(a => a is Antelope && a.Health > 0);
-        var liveLions = animals.Count(a => a is Lion && a.Health > 0);
+        var liveAnimals = new Dictionary<string, int>();
 
-        Console.WriteLine($"Live Antelopes: {liveAntelopes}");
-        Console.WriteLine($"Live Lions: {liveLions}");
-
-        if (liveAntelopes > 0 && liveLions == 0)
+        foreach (var animal in _logic.GetAnimals)
         {
-            Console.WriteLine("Antelopes won");
+            if (animal.Health > 0)
+            {
+                if (!liveAnimals.TryGetValue(animal.Name, out int value))
+                {
+                    value = 0;
+                    liveAnimals[animal.Name] = value;
+                }
+                liveAnimals[animal.Name] = ++value;
+            }
         }
-        else if (liveLions > 0 && liveAntelopes == 0)
+
+        foreach (var animal in liveAnimals.Keys)
         {
-            Console.WriteLine("Lions won");
+            _gameUI.Display($"Live {animal}s: {liveAnimals[animal]}");
+        }
+
+        if (liveAnimals.Count == 1)
+        {
+            _gameUI.Display($"{liveAnimals.Keys.First()}s won");
         }
     }
 }

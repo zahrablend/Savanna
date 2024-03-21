@@ -36,13 +36,9 @@ public class HealthMetricCounter
             for (int j = Math.Max(0, animal.Y - 1); j <= Math.Min(_fieldSize.Width - 1, animal.Y + 1); j++)
             {
                 var otherAnimal = _gameField[i, j];
-                if (otherAnimal != null)
+                if (otherAnimal != null && otherAnimal != animal)
                 {
-                    if (animal is Lion && otherAnimal is Antelope)
-                    {
-                        animal.Health += 1;
-                        otherAnimal.Health = 0;
-                    }
+                    animal.InteractWith(otherAnimal);
                 }
             }
         }

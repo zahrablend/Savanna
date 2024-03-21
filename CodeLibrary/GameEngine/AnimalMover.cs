@@ -1,5 +1,4 @@
-﻿using CodeLibrary.Animals;
-using CodeLibrary.Interfaces;
+﻿using CodeLibrary.Interfaces;
 
 namespace CodeLibrary.GameEngine;
 
@@ -47,16 +46,9 @@ public class AnimalMover
                 var otherAnimal = _gameField[i, j];
                 if (otherAnimal != null && otherAnimal.GetType() != animal.GetType())
                 {
-                    if (animal is Antelope && otherAnimal is Lion)
-                    {
-                        directionX = animal.X > otherAnimal.X ? animal.Speed : -animal.Speed;
-                        directionY = animal.Y > otherAnimal.Y ? animal.Speed : -animal.Speed;
-                    }
-                    else if (animal is Lion && otherAnimal is Antelope)
-                    {
-                        directionX = animal.X < otherAnimal.X ? animal.Speed : -animal.Speed;
-                        directionY = animal.Y < otherAnimal.Y ? animal.Speed : -animal.Speed;
-                    }
+                    var direction = animal.GetDirectionTo(otherAnimal);
+                    directionX = direction.directionX;
+                    directionY = direction.directionY;
                 }
             }
         }

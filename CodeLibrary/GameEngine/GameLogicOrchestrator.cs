@@ -7,8 +7,8 @@ public class GameLogicOrchestrator
 {
     private IAnimal?[,] _gameField;
     private List<IAnimal> _animals;
-    private readonly FieldDisplayer.FieldSize _fieldSize;
     private readonly FieldDisplayer _fieldDisplayer;
+    private readonly IGameUI _gameUI;
     private AnimalMover _animalMover;
     private HealthMetricCounter _healthMetricCounter;
     private AnimalRemover _animalRemover;
@@ -16,16 +16,16 @@ public class GameLogicOrchestrator
 
     public GameLogicOrchestrator() { }
 
-    public GameLogicOrchestrator(FieldDisplayer.FieldSize fieldSize, FieldDisplayer fieldDisplayer)
+    public GameLogicOrchestrator(FieldDisplayer fieldDisplayer, IGameUI gameUI)
     {
-        _fieldSize = fieldSize;
-        _gameField = new IAnimal[_fieldSize.Height, _fieldSize.Width];
-        _animals = new List<IAnimal>();
         _fieldDisplayer = fieldDisplayer;
+        _gameUI = gameUI;
+        _gameField = new IAnimal[_fieldDisplayer.Size.Height, _fieldDisplayer.Size.Width];
+        _animals = new List<IAnimal>();
 
         // Initialize the objects
-        _animalMover = new AnimalMover(_gameField, fieldSize);
-        _healthMetricCounter = new HealthMetricCounter(_gameField, fieldSize);
+        _animalMover = new AnimalMover(_gameField, fieldDisplayer.Size);
+        _healthMetricCounter = new HealthMetricCounter(_gameField, fieldDisplayer.Size);
         _animalRemover = new AnimalRemover(_gameField, _animals);
         _animalCreator = new AnimalCreator(this);
     }
@@ -37,8 +37,8 @@ public class GameLogicOrchestrator
 
         do
         {
-            x = new Random().Next(_fieldSize.Height);
-            y = new Random().Next(_fieldSize.Width);
+            x = new Random().Next(_fieldDisplayer.Size.Height);
+            y = new Random().Next(_fieldDisplayer.Size.Width);
         }
         while (_gameField[x, y] != null);
 
@@ -58,7 +58,7 @@ public class GameLogicOrchestrator
         _animalCreator.CreateAnimalOnBirth();
     }
 
-    public string DrawField => _fieldDisplayer.DrawField(_gameField, _fieldSize.Height, _fieldSize.Width);
+    public string DrawField => _fieldDisplayer.DrawField(_gameField, _fieldDisplayer.Size.Height, _fieldDisplayer.Size.Width);
     public List<IAnimal> GetAnimals => _animals;
     public IAnimal[,] GetGameField => _gameField;
 }

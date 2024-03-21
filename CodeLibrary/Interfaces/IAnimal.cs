@@ -7,4 +7,8 @@ public interface IAnimal
     int Speed { get; init; }
     int VisionRange { get; init; }
     double Health { get; set; }
+    string Name { get; }
+    char Symbol { get; }
+    (int directionX, int directionY) GetDirectionTo(IAnimal other);
+    void InteractWith(IAnimal other);
 }

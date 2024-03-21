@@ -1,4 +1,5 @@
 ﻿using CodeLibrary.Animals;
+using CodeLibrary.Constants;
 using CodeLibrary.Interfaces;
 using System.Text;
 
@@ -6,6 +7,7 @@ namespace CodeLibrary;
 
 public class FieldDisplayer
 {
+    public FieldSize Size {  get; set; }
     /// <summary>
     /// Represents the size of the field.
     /// </summary>
@@ -42,13 +44,9 @@ public class FieldDisplayer
             for (int j = 0; j < fieldWidth; j++)
             {
                 var animal = gameField[i, j];
-                if (animal is Antelope)
+                if (animal != null)
                 {
-                    sb.Append('A');
-                }
-                else if (animal is Lion)
-                {
-                    sb.Append('L');
+                    sb.Append(animal.Symbol);
                 }
                 else
                 {
