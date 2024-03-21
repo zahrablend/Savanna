@@ -24,7 +24,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AntelopeBehaviour\AntelopeBehaviour.csproj" />
     <ProjectReference Include="..\CodeLibrary\CodeLibrary.csproj" />
+    <ProjectReference Include="..\LionBehaviour\LionBehaviour.csproj" />
   </ItemGroup>
 
 </Project>

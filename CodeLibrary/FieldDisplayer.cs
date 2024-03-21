@@ -1,6 +1,4 @@
-﻿using CodeLibrary.Animals;
-using CodeLibrary.Constants;
-using CodeLibrary.Interfaces;
+﻿using Common.Interfaces;
 using System.Text;
 
 namespace CodeLibrary;
@@ -38,7 +36,7 @@ public class FieldDisplayer
     /// <returns>A string representation of the game field.</returns>
     public string DrawField(IAnimal[,] gameField, int fieldHeight, int fieldWidth)
     {
-        StringBuilder sb = new StringBuilder();
+        var sb = new StringBuilder();
         for (int i = 0; i < fieldHeight; i++)
         {
             for (int j = 0; j < fieldWidth; j++)

@@ -1,8 +1,7 @@
-﻿using CodeLibrary.Animals;
-using CodeLibrary.Constants;
-using CodeLibrary.Factories;
+﻿using CodeLibrary.Constants;
 using CodeLibrary.GameEngine;
 using CodeLibrary.Interfaces;
+using Common.Interfaces;
 
 namespace CodeLibrary;
 
@@ -16,11 +15,7 @@ public class Game
     private readonly Dictionary<char, (IAnimalFactory factory, int count)> _animalFactories;
     private readonly Queue<char> _animalOrder;
 
-    /// <summary>
-    /// Initializes a new instance of the Game class.
-    /// Sets up the game field, initializes counts for antelopes and lions, 
-    /// creates instances of FieldDisplayer and GameLogicOrchestrator.
-    /// </summary>
+
     public Game(IGameUI gameUI)
     {
         _gameUI = gameUI;
@@ -35,16 +30,33 @@ public class Game
         _random = new Random();
         _fieldDisplayer = new FieldDisplayer();
         _fieldDisplayer.Size = new FieldDisplayer.FieldSize(20,100);
-        _logic = new GameLogicOrchestrator(_fieldDisplayer, gameUI);
+        _logic = new GameLogicOrchestrator(_fieldDisplayer);
+        // Load the AntelopeBehaviour.dll and LionBehaviour.dll assemblies
+        var antelopeAssembly = AssemblyLoader.LoadAssembly(@"C:\Users\zahra\source\repos\Savanna\AntelopeBehaviour\bin\Debug\net8.0\AntelopeBehaviour.dll");
+        var lionAssembly = AssemblyLoader.LoadAssembly(@"C:\Users\zahra\source\repos\Savanna\LionBehaviour\bin\Debug\net8.0\LionBehaviour.dll");
+
+        // Get the AntelopeFactory and LionFactory types
+        var antelopeFactoryType = antelopeAssembly.GetType("AntelopeBehaviour.AntelopeFactory");
+        var lionFactoryType = lionAssembly.GetType("LionBehaviour.LionFactory");
+
+        if (antelopeFactoryType == null || lionFactoryType == null)
+        {
+            throw new TypeLoadException("Type not found in assembly.");
+        }
+
+        // Create instances of the AntelopeFactory and LionFactory
+        var antelopeFactory = (IAnimalFactory)Activator.CreateInstance(antelopeFactoryType);
+        var lionFactory = (IAnimalFactory)Activator.CreateInstance(lionFactoryType);
         // Initialize the animal factories
         _animalFactories = new Dictionary<char, (IAnimalFactory factory, int count)>
         {
-            { new Antelope().Symbol, (new AntelopeFactory(), 0) },
-            { new Lion().Symbol, (new LionFactory(), 0) }
+            { antelopeFactory.Symbol, (antelopeFactory, 0) },
+            { lionFactory.Symbol, (lionFactory, 0) }
         };
+
         _animalOrder = new Queue<char>();
-        _animalOrder.Enqueue(new Antelope().Symbol);
-        _animalOrder.Enqueue(new Lion().Symbol);
+        _animalOrder.Enqueue(antelopeFactory.Symbol);
+        _animalOrder.Enqueue(lionFactory.Symbol);
     }
 
     /// <summary>
@@ -84,7 +96,7 @@ public class Game
                 _gameUI.Clear();
                 _gameUI.Display(updatedGameState);
                 DisplayAnimalHealth();
-                await Task.Delay(1000);
+                await Task.Delay(100);
 
                 var key = await _gameUI.GetKeyPress();
                 if (key.HasValue && key.Value == ConsoleKey.S)

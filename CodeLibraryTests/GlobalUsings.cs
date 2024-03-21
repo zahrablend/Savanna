@@ -3,5 +3,6 @@ global using Moq;
 global using CodeLibrary;
 global using CodeLibrary.Constants;
 global using CodeLibrary.GameEngine;
-global using CodeLibrary.Interfaces;
-global using CodeLibrary.Animals;
+global using Common.Interfaces;
+global using AntelopeBehaviour;
+global using LionBehaviour;

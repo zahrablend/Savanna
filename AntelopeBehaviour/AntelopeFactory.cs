@@ -1,7 +1,6 @@
-﻿using CodeLibrary.Animals;
-using CodeLibrary.Interfaces;
+﻿using Common.Interfaces;
 
-namespace CodeLibrary.Factories;
+namespace AntelopeBehaviour;
 
 public class AntelopeFactory : IAnimalFactory
 {

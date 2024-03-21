@@ -4,19 +4,26 @@ public class AnimalCreatorTests
 {
     private readonly Mock<GameLogicOrchestrator> _logicMock;
     private readonly AnimalCreator _animalCreator;
+    private readonly AntelopeFactory _antelopeFactory;
 
     public AnimalCreatorTests()
     {
         _logicMock = new Mock<GameLogicOrchestrator>();
         _animalCreator = new AnimalCreator(_logicMock.Object);
+        _antelopeFactory = new AntelopeFactory();
     }
 
     [Fact]
     public void CreateAnimalOnBirth_TwoAnimalsOfSameTypeAreNeighboursForThreeConsecutiveRounds_AddNewAnimal()
     {
         // Arrange
-        var animal1 = new Antelope { X = 5, Y = 5 };
-        var animal2 = new Antelope { X = 6, Y = 5 };
+        var animal1 = _antelopeFactory.Create();
+        animal1.X = 5;
+        animal1.Y = 5;
+
+        var animal2 = _antelopeFactory.Create();
+        animal2.X = 6;
+        animal2.Y = 5;
         _animalCreator.SetAnimals(new List<IAnimal> { animal1, animal2 });
 
         // Act

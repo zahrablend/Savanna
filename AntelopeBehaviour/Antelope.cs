@@ -1,8 +1,8 @@
-﻿using CodeLibrary.Interfaces;
+﻿using Common.Interfaces;
 
-namespace CodeLibrary.Animals;
+namespace AntelopeBehaviour;
 
-public class Antelope : IAnimal
+public class Antelope : IAnimal, IPrey
 {
     public int X { get; set; }
     public int Y { get; set; }
@@ -16,7 +16,7 @@ public class Antelope : IAnimal
     public (int directionX, int directionY) GetDirectionTo(IAnimal other)
     {
         // Antelopes run away from lions
-        if (other is Lion)
+        if (other is IPredator)
         {
             return (X > other.X ? Speed : -Speed, Y > other.Y ? Speed : -Speed);
         }

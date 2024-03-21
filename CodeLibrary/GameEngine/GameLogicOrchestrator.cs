@@ -1,5 +1,5 @@
 ﻿using CodeLibrary.Constants;
-using CodeLibrary.Interfaces;
+using Common.Interfaces;
 
 namespace CodeLibrary.GameEngine;
 
@@ -8,7 +8,6 @@ public class GameLogicOrchestrator
     private IAnimal?[,] _gameField;
     private List<IAnimal> _animals;
     private readonly FieldDisplayer _fieldDisplayer;
-    private readonly IGameUI _gameUI;
     private AnimalMover _animalMover;
     private HealthMetricCounter _healthMetricCounter;
     private AnimalRemover _animalRemover;
@@ -16,16 +15,15 @@ public class GameLogicOrchestrator
 
     public GameLogicOrchestrator() { }
 
-    public GameLogicOrchestrator(FieldDisplayer fieldDisplayer, IGameUI gameUI)
+    public GameLogicOrchestrator(FieldDisplayer fieldDisplayer)
     {
         _fieldDisplayer = fieldDisplayer;
-        _gameUI = gameUI;
         _gameField = new IAnimal[_fieldDisplayer.Size.Height, _fieldDisplayer.Size.Width];
         _animals = new List<IAnimal>();
 
         // Initialize the objects
-        _animalMover = new AnimalMover(_gameField, fieldDisplayer.Size);
-        _healthMetricCounter = new HealthMetricCounter(_gameField, fieldDisplayer.Size);
+        _animalMover = new AnimalMover(_gameField, fieldDisplayer);
+        _healthMetricCounter = new HealthMetricCounter(_gameField, fieldDisplayer);
         _animalRemover = new AnimalRemover(_gameField, _animals);
         _animalCreator = new AnimalCreator(this);
     }
