@@ -1,11 +1,11 @@
-﻿using CodeLibrary.Interfaces;
+﻿using Common.Interfaces;
 
-namespace CodeLibrary.Animals;
+namespace LionBehaviour;
 
-public class Lion : IAnimal
+public class Lion : IAnimal, IPredator
 {
     public int X { get; set; }
-    public int Y { get; set; } 
+    public int Y { get; set; }
     public int Speed { get; init; } = 3;
     public int VisionRange { get; init; } = 4;
     public double Health { get; set; }
@@ -16,7 +16,7 @@ public class Lion : IAnimal
     public (int directionX, int directionY) GetDirectionTo(IAnimal other)
     {
         // Lions chase antelopes
-        if (other is Antelope)
+        if (other is IPrey)
         {
             return (X < other.X ? Speed : -Speed, Y < other.Y ? Speed : -Speed);
         }
@@ -39,4 +39,3 @@ public class Lion : IAnimal
         }
     }
 }
-

@@ -1,4 +1,4 @@
-﻿namespace CodeLibrary.Interfaces;
+﻿namespace Common.Interfaces;
 
 public interface IAnimalFactory
 {

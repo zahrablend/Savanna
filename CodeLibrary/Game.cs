@@ -1,13 +1,14 @@
-﻿using CodeLibrary.Animals;
-using CodeLibrary.Constants;
-using CodeLibrary.Factories;
+﻿using CodeLibrary.Constants;
 using CodeLibrary.GameEngine;
 using CodeLibrary.Interfaces;
+using System.Reflection;
 
 namespace CodeLibrary;
 
 public class Game
 {
+    Assembly antelopeAssembly = Assembly.LoadFile(@"C:\Users\zahra\source\repos\Savanna\AntelopeBehaviour\bin\Debug\net8.0\AntelopeBehaviour.dll");
+    Assembly lionAssembly = Assembly.LoadFile(@"C:\Users\zahra\source\repos\Savanna\LionBehaviour\bin\Debug\net8.0\LionBehaviour.dll");
     private char[,] _gameField;
     private Random _random;
     private readonly GameLogicOrchestrator _logic;
@@ -17,10 +18,9 @@ public class Game
     private readonly Queue<char> _animalOrder;
 
     /// <summary>
-    /// Initializes a new instance of the Game class.
-    /// Sets up the game field, initializes counts for antelopes and lions, 
-    /// creates instances of FieldDisplayer and GameLogicOrchestrator.
+    /// 
     /// </summary>
+    /// <param name="gameUI"></param>
     public Game(IGameUI gameUI)
     {
         _gameUI = gameUI;
@@ -35,7 +35,7 @@ public class Game
         _random = new Random();
         _fieldDisplayer = new FieldDisplayer();
         _fieldDisplayer.Size = new FieldDisplayer.FieldSize(20,100);
-        _logic = new GameLogicOrchestrator(_fieldDisplayer, gameUI);
+        _logic = new GameLogicOrchestrator(_fieldDisplayer);
         // Initialize the animal factories
         _animalFactories = new Dictionary<char, (IAnimalFactory factory, int count)>
         {
@@ -84,7 +84,7 @@ public class Game
                 _gameUI.Clear();
                 _gameUI.Display(updatedGameState);
                 DisplayAnimalHealth();
-                await Task.Delay(1000);
+                await Task.Delay(100);
 
                 var key = await _gameUI.GetKeyPress();
                 if (key.HasValue && key.Value == ConsoleKey.S)
