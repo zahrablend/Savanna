@@ -9,7 +9,7 @@
         double Health { get; set; }
         string Name { get; }
         char Symbol { get; }
-        (int directionX, int directionY) GetDirectionTo(IAnimal other);
+        Direction GetDirectionTo(IAnimal other);
         void InteractWith(IAnimal other);
     }
 }

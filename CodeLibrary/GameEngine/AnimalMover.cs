@@ -1,4 +1,6 @@
-﻿using Common.Interfaces;
+﻿using Common;
+using Common.Interfaces;
+using System.IO;
 
 namespace CodeLibrary.GameEngine;
 
@@ -21,22 +23,25 @@ public class AnimalMover
     /// <param name="animal">The animal to move.</param>
     public void MoveAnimal(IAnimal animal)
     {
-        var (directionX, directionY) = GetMovementDirection(animal);
-        var (newX, newY) = GetNewPosition(animal, directionX, directionY);
+        Direction direction = GetMovementDirection(animal);
+        Direction newPosition = GetNewPosition(animal, direction);
 
-        if (_gameField[newX, newY] == null)
+        if (_gameField[newPosition.X, newPosition.Y] == null)
         {
             _gameField[animal.X, animal.Y] = null;
-            animal.X = newX;
-            animal.Y = newY;
+            animal.X = newPosition.X;
+            animal.Y = newPosition.Y;
             _gameField[animal.X, animal.Y] = animal;
         }
     }
 
-    private (int directionX, int directionY) GetMovementDirection(IAnimal animal)
+    private Direction GetMovementDirection(IAnimal animal)
     {
-        int directionX = random.Next(-animal.Speed, animal.Speed + 1);
-        int directionY = random.Next(-animal.Speed, animal.Speed + 1);
+        Direction direction = new()
+        {
+            X = random.Next(-animal.Speed, animal.Speed + 1),
+            Y = random.Next(-animal.Speed, animal.Speed + 1)
+        };
 
         // Check for other animals within the vision range
         for (int i = Math.Max(0, animal.X - animal.VisionRange); i <= Math.Min(_fieldDisplayer.Size.Height - 1, animal.X + animal.VisionRange); i++)
@@ -46,13 +51,13 @@ public class AnimalMover
                 var otherAnimal = _gameField[i, j];
                 if (otherAnimal != null && otherAnimal.GetType() != animal.GetType())
                 {
-                    var direction = animal.GetDirectionTo(otherAnimal);
-                    directionX = direction.directionX;
-                    directionY = direction.directionY;
+                    var otherDirection = animal.GetDirectionTo(otherAnimal);
+                    direction.X = otherDirection.X;
+                    direction.Y = otherDirection.Y;
                 }
             }
         }
-        return (directionX, directionY);
+        return direction;
     }
 
     /// <summary>
@@ -62,17 +67,21 @@ public class AnimalMover
     /// <param name="dx">The movement direction on the x-axis.</param>
     /// <param name="dy">The movement direction on the y-axis.</param>
     /// <returns>A tuple of integers representing the new position on the x and y axes.</returns>
-    private (int newX, int newY) GetNewPosition(IAnimal animal, int directionX, int directionY)
+    private Direction GetNewPosition(IAnimal animal, Direction direction)
     {
-        int newX = (animal.X + directionX);
-        int newY = (animal.Y + directionY);
+        Direction newPosition = new()
+        {
+            X = (animal.X + direction.X),
+            Y = (animal.Y + direction.Y)
+        };
+        
 
         // Ensure the new position is within the game field boundaries
-        if (newX < 0) newX = 0;
-        if (newX >= _fieldDisplayer.Size.Height) newX = _fieldDisplayer.Size.Height - 1;
-        if (newY < 0) newY = 0;
-        if (newY >= _fieldDisplayer.Size.Width) newY = _fieldDisplayer.Size.Width - 1;
+        if (newPosition.X < 0) newPosition.X = 0;
+        if (newPosition.X >= _fieldDisplayer.Size.Height) newPosition.X = _fieldDisplayer.Size.Height - 1;
+        if (newPosition.Y < 0) newPosition.Y = 0;
+        if (newPosition.Y >= _fieldDisplayer.Size.Width) newPosition.Y = _fieldDisplayer.Size.Width - 1;
 
-        return (newX, newY);
+        return newPosition;
     }
 }

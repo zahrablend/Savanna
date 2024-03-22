@@ -1,4 +1,5 @@
-﻿using Common.Interfaces;
+﻿using Common;
+using Common.Interfaces;
 
 namespace AntelopeBehaviour;
 
@@ -13,14 +14,14 @@ public class Antelope : IAnimal, IPrey
     public char Symbol => 'A';
     public Antelope() { }
 
-    public (int directionX, int directionY) GetDirectionTo(IAnimal other)
+    public Direction GetDirectionTo(IAnimal other)
     {
         // Antelopes run away from lions
         if (other is IPredator)
         {
-            return (X > other.X ? Speed : -Speed, Y > other.Y ? Speed : -Speed);
+            return new Direction {X = X > other.X ? Speed : -Speed, Y = Y > other.Y ? Speed : -Speed};
         }
-        return (0, 0);
+        return new Direction { X = 0, Y = 0 };
     }
 
     public void InteractWith(IAnimal other)

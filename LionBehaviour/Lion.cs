@@ -1,4 +1,5 @@
-﻿using Common.Interfaces;
+﻿using Common;
+using Common.Interfaces;
 
 namespace LionBehaviour;
 
@@ -13,14 +14,14 @@ public class Lion : IAnimal, IPredator
     public char Symbol => 'L';
     public Lion() { }
 
-    public (int directionX, int directionY) GetDirectionTo(IAnimal other)
+    public Direction GetDirectionTo(IAnimal other)
     {
         // Lions chase antelopes
         if (other is IPrey)
         {
-            return (X < other.X ? Speed : -Speed, Y < other.Y ? Speed : -Speed);
+            return new Direction { X = X < other.X ? Speed : -Speed, Y = Y < other.Y ? Speed : -Speed };
         }
-        return (0, 0);
+        return new Direction { X = 0, Y = 0 };
     }
 
     /// <summary>
