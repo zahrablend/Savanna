@@ -3,14 +3,14 @@
 public class HealthMetricCounterTests
 {
     private readonly HealthMetricCounter _healthMetricCounter;
-    private readonly IAnimal[,] _gameField;
-    private readonly FieldDisplayer.FieldSize _fieldSize;
+    private readonly IAnimal?[,] _gameField;
+    private readonly FieldDisplayer _fieldDisplayer;
 
     public HealthMetricCounterTests()
     {
-        _fieldSize = new FieldDisplayer.FieldSize(10,10);
-        _gameField = new IAnimal[_fieldSize.Height, _fieldSize.Width];
-        _healthMetricCounter = new HealthMetricCounter(_gameField, _fieldSize);
+        _fieldDisplayer = new FieldDisplayer { Size = new FieldDisplayer.FieldSize(10, 10) };
+        _gameField = new IAnimal?[_fieldDisplayer.Size.Height, _fieldDisplayer.Size.Width];
+        _healthMetricCounter = new HealthMetricCounter(_gameField, _fieldDisplayer);
     }
 
     [Fact]

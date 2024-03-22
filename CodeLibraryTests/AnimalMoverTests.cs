@@ -1,29 +1,50 @@
 ﻿namespace CodeLibraryTests;
 
+public class TestAnimal : IAnimal
+{
+    public int X { get; set; }
+    public int Y { get; set; }
+    public int Speed { get; init; }
+    public int VisionRange { get; init; } = 1;
+    public double Health { get; set; } = 10.0;
+
+    public string Name => "TestName";
+
+    public char Symbol => 'T';
+
+    public (int directionX, int directionY) GetDirectionTo(IAnimal other)
+    {
+        return (0,0);
+    }
+
+    public void InteractWith(IAnimal other)
+    {
+    }
+}
 public class AnimalMoverTests
 {
     private readonly AnimalMover _animalMover;
     private readonly IAnimal[,] _gameField;
-    private readonly FieldDisplayer.FieldSize _fieldSize;
-    private readonly Mock<IAnimal> _animalMock;
+    private readonly FieldDisplayer _fieldDisplayer;
+    private readonly LionFactory _lionFactory;
 
     public AnimalMoverTests()
     {
-        _fieldSize = new FieldDisplayer.FieldSize(10, 10);
-        _gameField = new IAnimal[_fieldSize.Height, _fieldSize.Width];
-        _animalMover = new AnimalMover(_gameField, _fieldSize);
+        _fieldDisplayer = new FieldDisplayer();
+        _fieldDisplayer.Size = new FieldDisplayer.FieldSize(10, 10);
+        _gameField = new IAnimal[_fieldDisplayer.Size.Height, _fieldDisplayer.Size.Width];
+        _animalMover = new AnimalMover(_gameField, _fieldDisplayer);
 
-        _animalMock = new Mock<IAnimal>();
-        _animalMock.Setup(a => a.X).Returns(5);
-        _animalMock.Setup(a => a.Y).Returns(5);
-        _animalMock.Setup(a => a.Speed).Returns(2);
+        _lionFactory = new LionFactory();
     }
 
     [Fact]
     public void MoveAnimal_ShouldMoveAnimalToNewPosition()
     {
         // Arrange
-        var animal = _animalMock.Object;
+        var animal = _lionFactory.Create();
+        animal.X = 5;
+        animal.Y = 5;
         _gameField[5, 5] = animal;
 
         // Act
@@ -37,7 +58,7 @@ public class AnimalMoverTests
     public void MoveAnimal_ShouldMoveAnimalWithCorrectSpeed()
     {
         // Arrange
-        var animal = _animalMock.Object;
+        var animal = new TestAnimal { X = 5, Y = 5, Speed = 2 };
         _gameField[5, 5] = animal;
 
         // Act

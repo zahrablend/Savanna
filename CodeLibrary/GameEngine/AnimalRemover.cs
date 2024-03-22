@@ -1,4 +1,4 @@
-﻿using CodeLibrary.Interfaces;
+﻿using Common.Interfaces;
 
 namespace CodeLibrary.GameEngine;
 

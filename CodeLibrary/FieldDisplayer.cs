@@ -1,11 +1,11 @@
-﻿using CodeLibrary.Animals;
-using CodeLibrary.Interfaces;
+﻿using Common.Interfaces;
 using System.Text;
 
 namespace CodeLibrary;
 
 public class FieldDisplayer
 {
+    public FieldSize Size {  get; set; }
     /// <summary>
     /// Represents the size of the field.
     /// </summary>
@@ -36,19 +36,15 @@ public class FieldDisplayer
     /// <returns>A string representation of the game field.</returns>
     public string DrawField(IAnimal[,] gameField, int fieldHeight, int fieldWidth)
     {
-        StringBuilder sb = new StringBuilder();
+        var sb = new StringBuilder();
         for (int i = 0; i < fieldHeight; i++)
         {
             for (int j = 0; j < fieldWidth; j++)
             {
                 var animal = gameField[i, j];
-                if (animal is Antelope)
+                if (animal != null)
                 {
-                    sb.Append('A');
-                }
-                else if (animal is Lion)
-                {
-                    sb.Append('L');
+                    sb.Append(animal.Symbol);
                 }
                 else
                 {

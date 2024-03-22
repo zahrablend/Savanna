@@ -3,18 +3,19 @@
 public class GameLogicOrchestratorTests
 {
     private readonly GameLogicOrchestrator _orchestrator;
+    private readonly LionFactory _lionFactory;
 
     public GameLogicOrchestratorTests()
     {
-        // Initialize orchestrator with a field size of your choice
-        _orchestrator = new GameLogicOrchestrator(new FieldDisplayer.FieldSize(10,10), new FieldDisplayer());
+        _orchestrator = new GameLogicOrchestrator(new FieldDisplayer { Size = new FieldDisplayer.FieldSize(10, 10) });
+        _lionFactory = new LionFactory();
     }
 
     [Fact]
     public void AddAnimal_ShouldAddAnimalToAnimalsList()
     {
         // Arrange
-        var animal = new Lion(); // Replace YourAnimalClass with your actual class that implements IAnimal
+        var animal = _lionFactory.Create();
 
         // Act
         _orchestrator.AddAnimal(animal);
@@ -28,12 +29,12 @@ public class GameLogicOrchestratorTests
     {
 
         // Arrange
-        var animal = new Lion(); // Replace YourAnimalClass with your actual class that implements IAnimal
+        var animal = _lionFactory.Create();
 
         // Act
         _orchestrator.AddAnimal(animal);
 
         // Assert
-        Assert.Contains(animal, _orchestrator.GetGameField.Cast<IAnimal>());
+        Assert.Contains(animal, _orchestrator.GetGameField.Cast<IAnimal?>().Where(a => a != null).Select(a => a!));
     }
 }
