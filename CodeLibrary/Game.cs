@@ -1,4 +1,6 @@
-﻿using CodeLibrary.Constants;
+﻿using CodeLibrary.Animals;
+using CodeLibrary.Constants;
+using CodeLibrary.Factories;
 using CodeLibrary.GameEngine;
 using CodeLibrary.Interfaces;
 using Common.Interfaces;
