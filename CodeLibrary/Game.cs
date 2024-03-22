@@ -31,9 +31,16 @@ public class Game
         _fieldDisplayer = new FieldDisplayer();
         _fieldDisplayer.Size = new FieldDisplayer.FieldSize(20,100);
         _logic = new GameLogicOrchestrator(_fieldDisplayer);
-        // Load the AntelopeBehaviour.dll and LionBehaviour.dll assemblies
-        var antelopeAssembly = AssemblyLoader.LoadAssembly(@"C:\Users\zahra\source\repos\Savanna\AntelopeBehaviour\bin\Debug\net8.0\AntelopeBehaviour.dll");
-        var lionAssembly = AssemblyLoader.LoadAssembly(@"C:\Users\zahra\source\repos\Savanna\LionBehaviour\bin\Debug\net8.0\LionBehaviour.dll");
+        var antelopeAssemblyPath = Environment.GetEnvironmentVariable("ANTELOPEBEHAVIOUR_PATH");
+        var lionAssemblyPath = Environment.GetEnvironmentVariable("LIONBEHAVIOUR_PATH");
+
+        if (string.IsNullOrEmpty(antelopeAssemblyPath) || string.IsNullOrEmpty(lionAssemblyPath))
+        {
+            throw new InvalidOperationException("Environment variables ANTELOPEBEHAVIOUR_PATH and/or LIONBEHAVIOUR_PATH are not set.");
+        }
+
+        var antelopeAssembly = AssemblyLoader.LoadAssembly(antelopeAssemblyPath);
+        var lionAssembly = AssemblyLoader.LoadAssembly(lionAssemblyPath);
 
         // Get the AntelopeFactory and LionFactory types
         var antelopeFactoryType = antelopeAssembly.GetType("AntelopeBehaviour.AntelopeFactory");
@@ -47,6 +54,7 @@ public class Game
         // Create instances of the AntelopeFactory and LionFactory
         var antelopeFactory = (IAnimalFactory)Activator.CreateInstance(antelopeFactoryType);
         var lionFactory = (IAnimalFactory)Activator.CreateInstance(lionFactoryType);
+
         // Initialize the animal factories
         _animalFactories = new Dictionary<char, (IAnimalFactory factory, int count)>
         {
