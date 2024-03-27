@@ -1,6 +1,5 @@
 ﻿using CodeLibrary.Constants;
 using CodeLibrary.GameEngine;
-using CodeLibrary.Interfaces;
 using Common.Interfaces;
 
 namespace CodeLibrary;
@@ -14,6 +13,7 @@ public class Game
     private readonly IGameUI _gameUI;
     private readonly Dictionary<char, (IAnimalFactory factory, int count)> _animalFactories;
     private readonly Queue<char> _animalOrder;
+    //private readonly IGameRepository _gameRepository;
 
 
     public Game(IGameUI gameUI)
@@ -29,7 +29,7 @@ public class Game
         }
         _random = new Random();
         _fieldDisplayer = new FieldDisplayer();
-        _fieldDisplayer.Size = new FieldDisplayer.FieldSize(20,100);
+        _fieldDisplayer.Size = new FieldDisplayer.FieldSize(20, 100);
         _logic = new GameLogicOrchestrator(_fieldDisplayer);
         var antelopeAssemblyPath = Environment.GetEnvironmentVariable("ANTELOPEBEHAVIOUR_PATH");
         var lionAssemblyPath = Environment.GetEnvironmentVariable("LIONBEHAVIOUR_PATH");
@@ -65,6 +65,7 @@ public class Game
         _animalOrder = new Queue<char>();
         _animalOrder.Enqueue(antelopeFactory.Symbol);
         _animalOrder.Enqueue(lionFactory.Symbol);
+        //_gameRepository = gameRepository;
     }
 
     /// <summary>
