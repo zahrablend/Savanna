@@ -1,8 +1,11 @@
+using CodeLibrary;
 using Common.IdentityEntities;
+using Common.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Savanna.Infrastructure;
+using Savanna.Web.Services;
 
 namespace Savanna.Web
 {
@@ -17,7 +20,7 @@ namespace Savanna.Web
             {
                 //options.Conventions.AddAreaPageRoute("Identity", "Account/Login", "");
             });
-
+            builder.Services.AddSignalR();
             builder.Services.AddDbContext<GameContext>(options =>
             {
                 options.UseSqlServer();
@@ -31,6 +34,10 @@ namespace Savanna.Web
                 .AddDefaultTokenProviders()
                 .AddUserStore<UserStore<ApplicationUser, ApplicationRole, GameContext, Guid>>()
                 .AddRoleStore<RoleStore<ApplicationRole, GameContext, Guid>>();
+
+            builder.Services.AddSingleton<IGameUI, WebGameUI>();
+            builder.Services.AddSingleton<IGameEventService, WebGameUI>();
+            builder.Services.AddSingleton<Game>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -48,9 +55,11 @@ namespace Savanna.Web
 
             app.UseAuthorization();
 
+            // Map controllers and SignalR hubs
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Account}/{action=Login}/{id?}");
+            app.MapHub<GameHub>("/gameHub");
 
             app.Run();
         }

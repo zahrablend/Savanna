@@ -28,5 +28,10 @@ namespace Savanna.ConsoleApp
             await Task.Delay(1000);
             return null;
         }
+
+        public string GetLastGameState()
+        {
+            return null;
+        }
     }
 }
