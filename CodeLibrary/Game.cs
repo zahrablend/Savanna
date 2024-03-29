@@ -13,8 +13,12 @@ public class Game
     private readonly IGameUI _gameUI;
     private readonly Dictionary<char, (IAnimalFactory factory, int count)> _animalFactories;
     private readonly Queue<char> _animalOrder;
-    //private readonly IGameRepository _gameRepository;
+    public bool IsRunning { get; private set; } = true;
 
+    public IGameUI GetGameUI()
+    {
+        return _gameUI;
+    }
 
     public Game(IGameUI gameUI)
     {
@@ -65,7 +69,6 @@ public class Game
         _animalOrder = new Queue<char>();
         _animalOrder.Enqueue(antelopeFactory.Symbol);
         _animalOrder.Enqueue(lionFactory.Symbol);
-        //_gameRepository = gameRepository;
     }
 
     /// <summary>
@@ -77,11 +80,9 @@ public class Game
     /// 
     public async Task Run()
     {
-        while (true)
-        {
-            string gameState = string.Join("\n", Enumerable.Range(0, _gameField.GetLength(0))
-        .Select(i => new string(Enumerable.Range(0, _gameField.GetLength(1))
-        .Select(j => _gameField[i, j]).ToArray())));
+        string gameState = string.Join("\n", Enumerable.Range(0, _gameField.GetLength(0))
+                .Select(i => new string(Enumerable.Range(0, _gameField.GetLength(1))
+                .Select(j => _gameField[i, j]).ToArray())));
 
             _gameUI.Clear();
             _gameUI.Display(gameState);
@@ -113,10 +114,9 @@ public class Game
                     _gameUI.Display(Constant.GameOverMessage);
                     DisplayLiveAnimalsCount();
                     _gameUI.Display(Constant.CloseAppMessage);
-                    break;
+                    IsRunning = false;
                 }
             }
-        }
     }
 
     /// <summary>

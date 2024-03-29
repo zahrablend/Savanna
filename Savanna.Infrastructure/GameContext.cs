@@ -1,5 +1,5 @@
 ﻿using Common.Entities;
-using Common.IdentityEntities;
+using Common.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,12 +16,6 @@ namespace Savanna.Infrastructure
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<GameEntity>().ToTable("Games");
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlServer("Connection String Here");
         }
     }
 }

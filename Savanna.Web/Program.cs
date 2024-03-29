@@ -1,5 +1,5 @@
 using CodeLibrary;
-using Common.IdentityEntities;
+using Common.Identity;
 using Common.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -35,9 +35,9 @@ namespace Savanna.Web
                 .AddUserStore<UserStore<ApplicationUser, ApplicationRole, GameContext, Guid>>()
                 .AddRoleStore<RoleStore<ApplicationRole, GameContext, Guid>>();
 
-            builder.Services.AddSingleton<IGameUI, WebGameUI>();
-            builder.Services.AddSingleton<IGameEventService, WebGameUI>();
-            builder.Services.AddSingleton<Game>();
+            builder.Services.AddScoped<IGameUI, WebGameUI>();
+            builder.Services.AddScoped<IGameEventService, WebGameUI>();
+            builder.Services.AddScoped<Game>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

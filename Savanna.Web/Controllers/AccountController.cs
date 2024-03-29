@@ -1,4 +1,4 @@
-﻿using Common.IdentityEntities;
+﻿using Common.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Savanna.Web.Models;
@@ -47,17 +47,16 @@ namespace Savanna.Web.Controllers
             {
                 //Sign In
                 await _signInManager.SignInAsync(user, isPersistent: false);
-                return RedirectToAction(nameof(GameplayController.Index), "Gameplay");
+                return RedirectToAction(nameof(GameController.Index), "Game");
             }
             else
             {
                 foreach (IdentityError error in result.Errors)
                 {
                     ModelState.AddModelError("Register", error.Description);
-                }
+                }   
                 return View(registerViewModel);
             }
-            //TODO: Store user registration details into Identity database
         }
 
         [HttpGet]
@@ -81,7 +80,7 @@ namespace Savanna.Web.Controllers
 
             if (result.Succeeded)
             {
-                return RedirectToAction(nameof(GameplayController.Index), "Gameplay");
+                return RedirectToAction(nameof(GameController.Index), "Game");
             }
             ModelState.AddModelError("Login", "Invalid email or password");
             return View();

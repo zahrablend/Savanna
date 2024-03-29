@@ -7,7 +7,8 @@ public static class Program
     public static async Task Main(string[] args)
     {
         var game = new Game(new ConsoleGameUI());
-        await game.Run();
+        var gameRunner = new ConsoleGameRunner();
+        await gameRunner.Run(game);
         Console.ReadKey();
     }
 }

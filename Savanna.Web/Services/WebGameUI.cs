@@ -18,17 +18,15 @@ public class WebGameUI : IGameUI, IGameEventService
         _hubContext = hubContext;
     }
 
-
     public void Clear()
     {
-        _lastGameState = null;
-        _hubContext.Clients.All.SendAsync("Clear");
+       
     }
 
 
     public void Display(string message)
     {
-        _lastGameState = message; // Store the game state
+        _lastGameState = message;
         _hubContext.Clients.All.SendAsync("Display", message);
     }
 
