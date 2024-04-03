@@ -1,6 +1,7 @@
 using CodeLibrary;
 using Common.Identity;
 using Common.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +10,7 @@ using Savanna.Web.Services;
 
 namespace Savanna.Web
 {
-    public class Program
+    public static class Program
     {
         public static void Main(string[] args)
         {
@@ -18,12 +19,12 @@ namespace Savanna.Web
             // Add services to the container.
             builder.Services.AddControllersWithViews().AddRazorPagesOptions(options =>
             {
-                //options.Conventions.AddAreaPageRoute("Identity", "Account/Login", "");
+                options.Conventions.AddAreaPageRoute("Identity", "Account/Login", "");
             });
             builder.Services.AddSignalR();
             builder.Services.AddDbContext<GameContext>(options =>
             {
-                options.UseSqlServer();
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
 
             builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
@@ -35,9 +36,22 @@ namespace Savanna.Web
                 .AddUserStore<UserStore<ApplicationUser, ApplicationRole, GameContext, Guid>>()
                 .AddRoleStore<RoleStore<ApplicationRole, GameContext, Guid>>();
 
+            builder.Services.AddAuthorization(options =>
+            {
+                options.FallbackPolicy = new AuthorizationPolicyBuilder()
+                .RequireAuthenticatedUser().Build();
+            });
+
+            builder.Services.ConfigureExternalCookie(options =>
+            {
+                options.LoginPath = "/Account/login";
+            });
+
             builder.Services.AddScoped<IGameUI, WebGameUI>();
             builder.Services.AddScoped<IGameEventService, WebGameUI>();
             builder.Services.AddScoped<Game>();
+            builder.Services.AddScoped<IGameRepository, GameRepository>();
+            builder.Services.AddScoped<GameService>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -50,9 +64,9 @@ namespace Savanna.Web
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-            app.UseAuthentication();
-            app.UseRouting();
 
+            app.UseRouting();
+            app.UseAuthentication();
             app.UseAuthorization();
 
             // Map controllers and SignalR hubs

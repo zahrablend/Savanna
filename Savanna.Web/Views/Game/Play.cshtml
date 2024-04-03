@@ -1,0 +1,88 @@
+﻿@model GameViewModel
+
+@{
+    ViewBag.Title = "Play";
+}
+<h1>Game @Model.GameId</h1>
+
+<div>
+    <div class="d-flex justify-content-between mb-3">
+        <button class="btn bnt-primary" onclick="toggleDisplay('symbol')">
+            Animal As Symbol
+        </button>
+        <button class="btn bnt-primary" onclick="toggleDisplay('icon')">
+            Animal As Icon
+        </button>
+    </div>
+    <div class="container border" style="padding:20px">
+        <pre id="gameField">@Model.GameState</pre>
+    </div>
+    <div class="d-flex flex-column align-items-center mb-3">
+        <form method="post" action="@Url.Action("SaveGame", "Game")">
+            <input type="hidden" name="GameId" value="@Model.GameId" />
+            <input type="hidden" name="GameState" value="@Model.GameState" />
+            <input type="hidden" name="Name" value="@Model.Name" />
+            <button type="submit" class="btn btn-primary">
+                Save Game
+            </button>
+        </form>
+    </div>
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.js"></script>
+<script>
+    window.onload = function () {
+        setInterval(fetchGameState, 1000);  // Fetch game state every 1000 milliseconds (1 second)
+    }
+
+    function fetchGameState() {
+        fetch('/game/state')
+            .then(response => response.text())
+            .then(gameState => {
+                const gameField = document.getElementById("gameField");
+                gameField.textContent = gameState;
+            });
+    }
+
+    var connection = new signalR.HubConnectionBuilder().withUrl("/gameHub").build();
+
+    // window.onload = function () {
+    //     connection.start()
+    //         .then(() => {
+    //             console.log('Connection started');
+    //             connection.invoke("RequestGameState").catch(err => console.error(err.toString()));
+    //         })
+    //         .catch(err => console.error('Error while starting connection: ' + err));
+
+    //added start
+    connection.start()
+        .then(() => {
+            console.log('Connection started');
+            connection.invoke("RequestGameState").catch(err => console.error(err.toString()));
+        })
+        .catch(err => console.error('Error while starting connection: ' + err));
+
+    connection.on("Display", function (message) {
+        console.log('Received message: ' + message);
+        const gameField = document.getElementById("gameField");
+        gameField.textContent = message;
+    });
+
+    document.addEventListener("keydown", function (event) {
+        connection.invoke("SendKeyPress", event.key).catch(function (err) {
+            return console.error(err.toString());
+        });
+    });
+
+        function toggleDisplay(type) {
+            var animals = document.getElementsByClassName('animal');
+            for (var i = 0; i < animals.length; i++) {
+                if (type == 'symbol') {
+                    animals[i].innerText = animals[i].getAttribute('data-symbol');
+                } else if (type == 'icon') {
+                    animals[i].innerHTML = '<img src="' + animals[i].getAttribute('data-icon') + '" />';
+                }
+            }
+        }
+</script>

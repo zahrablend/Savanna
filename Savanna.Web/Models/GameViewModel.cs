@@ -1,9 +1,9 @@
-﻿using System.Collections.Concurrent;
+﻿namespace Savanna.Web.Models;
 
-namespace Savanna.Web.Models
+public class GameViewModel
 {
-    public class GameViewModel
-    {
-        public string GameState { get; set; } // The current state of the game
-    }
+    public int GameId { get; set; }
+    public string? GameState { get; set; }
+    public string? Name { get; set;}
+    public int GameIteration { get; set; }
 }

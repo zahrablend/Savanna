@@ -1,0 +1,10 @@
+﻿@model List<GameViewModel>
+
+<ul>
+    @foreach (var game in Model)
+    {
+        <li>
+            <a href="@Url.Action("Play", "Game", new {isNewGame = false, gameId = game.GameId})">@game.Name</a>
+        </li>
+    }
+</ul>

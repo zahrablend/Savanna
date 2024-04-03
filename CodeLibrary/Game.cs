@@ -1,6 +1,8 @@
 ﻿using CodeLibrary.Constants;
 using CodeLibrary.GameEngine;
+using Common.Entities;
 using Common.Interfaces;
+using System.Xml.Linq;
 
 namespace CodeLibrary;
 
@@ -14,6 +16,8 @@ public class Game
     private readonly Dictionary<char, (IAnimalFactory factory, int count)> _animalFactories;
     private readonly Queue<char> _animalOrder;
     public bool IsRunning { get; private set; } = true;
+    public string GameState { get; private set; }
+    public int GameIteration { get; private set; }
 
     public IGameUI GetGameUI()
     {
@@ -105,6 +109,8 @@ public class Game
                 string updatedGameState = _logic.DrawField;
                 _gameUI.Clear();
                 _gameUI.Display(updatedGameState);
+                GameIteration++;
+
                 DisplayAnimalHealth();
                 await Task.Delay(100);
 
@@ -117,6 +123,17 @@ public class Game
                     IsRunning = false;
                 }
             }
+    }
+
+
+    public void SetState(string gameState)
+    {
+        this.GameState = gameState;
+    }
+
+    public void SetIteration(int gameIteration)
+    {
+        this.GameIteration = gameIteration;
     }
 
     /// <summary>
