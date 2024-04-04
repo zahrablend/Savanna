@@ -5,7 +5,7 @@ using System.Collections.Concurrent;
 
 namespace Savanna.Web.Services;
 
-public class WebGameUI : IGameUI, IGameEventService
+public class WebGameUI : IGameUI, IGameEventService, IGameStateSender
 {
     private IHubContext<GameHub> _hubContext;
     private ConcurrentQueue<ConsoleKey?> _keyPresses = new ConcurrentQueue<ConsoleKey?>();
@@ -52,11 +52,19 @@ public class WebGameUI : IGameUI, IGameEventService
 
     public void RaiseKeyPressEvent(string key)
     {
-        if (Enum.TryParse(key, out ConsoleKey consoleKey))
+        if (Enum.TryParse(key, out ConsoleKey consoleKey) 
+            && (consoleKey == ConsoleKey.A 
+            || consoleKey == ConsoleKey.Z 
+            || consoleKey == ConsoleKey.L 
+            || consoleKey == ConsoleKey.S))
         {
             _keyPresses.Enqueue(consoleKey);
         }
-
         KeyPressed.Invoke(key);
+    }
+
+    public void SendGameState(string gameState)
+    {
+        _hubContext.Clients.All.SendAsync("Display", gameState);
     }
 }

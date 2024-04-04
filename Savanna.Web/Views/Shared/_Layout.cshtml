@@ -1,4 +1,9 @@
-﻿<!DOCTYPE html>
+﻿@using Common.Identity
+@using Microsoft.AspNetCore.Identity
+
+@inject UserManager<ApplicationUser> UserManager
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -21,9 +26,12 @@
                     <ul class="navbar-nav flex-grow-1">
                         @if (User.Identity.IsAuthenticated)
                         {
-                            <li>
-                                <i class="fa-solid fa-user"></i>
-                                @User.Identity?.Name
+                            <li style="display: flex; align-items: center;">
+                                @{
+                                    var user = await UserManager.GetUserAsync(User);
+                                    var nickName = user?.NickName;
+                                }
+                                <span class="text-decoration-underline text-primary">@nickName</span>
                             </li>
                             <li>
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>

@@ -1,4 +1,5 @@
 using CodeLibrary;
+using CodeLibrary.Interfaces;
 using Common.Identity;
 using Common.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Savanna.Infrastructure;
+using Savanna.Web.Controllers;
 using Savanna.Web.Services;
 
 namespace Savanna.Web
@@ -47,6 +49,8 @@ namespace Savanna.Web
                 options.LoginPath = "/Account/login";
             });
 
+            builder.Services.AddScoped<WebGameUI>();
+            builder.Services.AddScoped<IGameRunner, WebGameRunner>();
             builder.Services.AddScoped<IGameUI, WebGameUI>();
             builder.Services.AddScoped<IGameEventService, WebGameUI>();
             builder.Services.AddScoped<Game>();

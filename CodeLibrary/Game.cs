@@ -1,8 +1,6 @@
 ﻿using CodeLibrary.Constants;
 using CodeLibrary.GameEngine;
-using Common.Entities;
 using Common.Interfaces;
-using System.Xml.Linq;
 
 namespace CodeLibrary;
 
@@ -88,41 +86,41 @@ public class Game
                 .Select(i => new string(Enumerable.Range(0, _gameField.GetLength(1))
                 .Select(j => _gameField[i, j]).ToArray())));
 
+        _gameUI.Clear();
+        _gameUI.Display(gameState);
+
+        if (_animalOrder.Count > 0)
+        {
+            await AddAnimalInitialSetup();
+        }
+        else
+        {
+            // Create a copy of the animals list
+            var animalsCopy = new List<IAnimal>(_logic.GetAnimals);
+            //Start Game: 
+            foreach (var animal in animalsCopy)
+            {
+                _logic.PlayGame(animal);
+            }
+
+            // Display the updated state of the game field
+            string updatedGameState = _logic.DrawField;
             _gameUI.Clear();
-            _gameUI.Display(gameState);
+            _gameUI.Display(updatedGameState);
+            GameIteration++;
 
-            if (_animalOrder.Count > 0)
+            DisplayAnimalHealth();
+            await Task.Delay(100);
+
+            var key = await _gameUI.GetKeyPress();
+            if (key.HasValue && key.Value == ConsoleKey.S)
             {
-                await AddAnimalInitialSetup();
+                _gameUI.Display(Constant.GameOverMessage);
+                DisplayLiveAnimalsCount();
+                _gameUI.Display(Constant.CloseAppMessage);
+                IsRunning = false;
             }
-            else
-            {
-                // Create a copy of the animals list
-                var animalsCopy = new List<IAnimal>(_logic.GetAnimals);
-                //Start Game: 
-                foreach (var animal in animalsCopy)
-                {
-                    _logic.PlayGame(animal);
-                }
-
-                // Display the updated state of the game field
-                string updatedGameState = _logic.DrawField;
-                _gameUI.Clear();
-                _gameUI.Display(updatedGameState);
-                GameIteration++;
-
-                DisplayAnimalHealth();
-                await Task.Delay(100);
-
-                var key = await _gameUI.GetKeyPress();
-                if (key.HasValue && key.Value == ConsoleKey.S)
-                {
-                    _gameUI.Display(Constant.GameOverMessage);
-                    DisplayLiveAnimalsCount();
-                    _gameUI.Display(Constant.CloseAppMessage);
-                    IsRunning = false;
-                }
-            }
+        }
     }
 
 
@@ -167,7 +165,7 @@ public class Game
                 indexX = _random.Next(_gameField.GetLength(0));
                 indexY = _random.Next(_gameField.GetLength(1));
             } while (_gameField[indexX, indexY] != '.');
-           
+
             _gameField[indexX, indexY] = animalSymbol;
 
             IAnimal gameAnimal = animalFactory.Create();
@@ -200,8 +198,8 @@ public class Game
                 value = 1;
                 animalId[animal.Name] = value;
             }
-            _gameUI.Display(animal.Health > 0 
-                ? $"{animal.Name} {value}: health {animal.Health}" 
+            _gameUI.Display(animal.Health > 0
+                ? $"{animal.Name} {value}: health {animal.Health}"
                 : $"{animal.Name} {value}: health {animal.Health} - died");
             animalId[animal.Name] = ++value;
         }

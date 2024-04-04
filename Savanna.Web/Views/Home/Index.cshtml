@@ -3,14 +3,14 @@
 }
 
 <div class="text-center mb-3">
-    <h1 class="display-4">Savanna Game</h1>
+    <h1 class="display-4" style="margin: auto;">Savanna Game</h1>
 </div>
 
-<div class="d-flex flex-column align-items-center" style="height: 100vh;">
-    <button class="btn btn-primary mb-3" onclick="location.href='@Url.Action("Play", "Game", new {isNewGame = true})'">
+<div class="d-flex flex-column align-items-center p-2 gap-3" style="height: 100vh;">
+    <button class="btn btn-outline-dark btn-lg" style="width: 200px;" onclick="location.href='@Url.Action("Play", "Game", new {isNewGame = true})'">
         New Game
     </button>
-    <button class="btn btn-secondary mb-3" onclick="location.href='@Url.Action("Play", "Game", new {isNewGame = false})'">
+    <button class="btn btn-outline-dark btn-lg" style="width: 200px;" onclick="location.href='@Url.Action("Play", "Game", new {isNewGame = false})'">
         Load Game
     </button>
 

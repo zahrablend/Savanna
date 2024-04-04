@@ -7,7 +7,7 @@ public class GameEntity
     public string? Name { get; set; }
     public string? GameState { get; set; }
     public int GameIteration { get; set; }
-
+    
 
     public GameEntity()
     {
