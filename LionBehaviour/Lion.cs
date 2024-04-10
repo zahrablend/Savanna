@@ -1,5 +1,5 @@
-﻿using Common;
-using Common.Interfaces;
+﻿using Common.Interfaces;
+using Common.ValueObjects;
 
 namespace LionBehaviour;
 

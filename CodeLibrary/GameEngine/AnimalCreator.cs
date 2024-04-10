@@ -4,21 +4,13 @@ namespace CodeLibrary.GameEngine;
 
 public class AnimalCreator
 {
-    private List<IAnimal> _animals;
-    private GameLogicOrchestrator _logic;
+    private GameSetup _gameSetup;
     private Dictionary<(IAnimal, IAnimal), int> _consecutiveRounds = new();
 
 
-    public AnimalCreator(GameLogicOrchestrator logic)
+    public AnimalCreator(GameSetup gameSetup)
     {
-        _logic = logic;
-        _animals = new List<IAnimal>();
-    }
-
-
-    public void SetAnimals(List<IAnimal> animals)
-    {
-        _animals = animals;
+        _gameSetup  = gameSetup;
     }
 
     /// <summary>
@@ -26,12 +18,14 @@ public class AnimalCreator
     /// </summary>
     public void CreateAnimalOnBirth()
     {
-        for (int i = 0; i < _animals.Count; i++)
+        var animals = _gameSetup.GetAnimals;
+
+        for (int i = 0; i < animals.Count; i++)
         {
-            for (int j = i + 1; j < _animals.Count; j++)
+            for (int j = i + 1; j < animals.Count; j++)
             {
-                var animal1 = _animals[i];
-                var animal2 = _animals[j];
+                var animal1 = animals[i];
+                var animal2 = animals[j];
 
                 if (animal1.GetType() == animal2.GetType() && AreNeighbours(animal1, animal2))
                 {
@@ -49,7 +43,7 @@ public class AnimalCreator
                     if (_consecutiveRounds[pair] >= 3)
                     {
                         var newAnimal = (IAnimal)Activator.CreateInstance(animal1.GetType());
-                        _logic.AddAnimal(newAnimal);
+                        _gameSetup.AddAnimal(newAnimal);
                         _consecutiveRounds[pair] = 0;
                     }
                 }

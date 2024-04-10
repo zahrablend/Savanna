@@ -1,22 +1,14 @@
 ﻿using Common.Interfaces;
-using Microsoft.AspNetCore.SignalR;
-using Savanna.Infrastructure;
 using System.Collections.Concurrent;
 
 namespace Savanna.Web.Services;
 
-public class WebGameUI : IGameUI, IGameEventService, IGameStateSender
+public class WebGameUIService : IGameUI, IGameEventService
 {
-    private IHubContext<GameHub> _hubContext;
     private ConcurrentQueue<ConsoleKey?> _keyPresses = new ConcurrentQueue<ConsoleKey?>();
     private string _lastGameState;
 
     public event Action<string> KeyPressed = delegate { };
-
-    public WebGameUI(IHubContext<GameHub> hubContext)
-    {
-        _hubContext = hubContext;
-    }
 
     public void Clear()
     {
@@ -27,7 +19,6 @@ public class WebGameUI : IGameUI, IGameEventService, IGameStateSender
     public void Display(string message)
     {
         _lastGameState = message;
-        _hubContext.Clients.All.SendAsync("Display", message);
     }
 
 
@@ -65,6 +56,6 @@ public class WebGameUI : IGameUI, IGameEventService, IGameStateSender
 
     public void SendGameState(string gameState)
     {
-        _hubContext.Clients.All.SendAsync("Display", gameState);
+        _lastGameState = gameState;
     }
 }

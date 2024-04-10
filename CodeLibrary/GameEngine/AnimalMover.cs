@@ -1,16 +1,15 @@
-﻿using Common;
-using Common.Interfaces;
-using System.IO;
+﻿using Common.Interfaces;
+using Common.ValueObjects;
 
 namespace CodeLibrary.GameEngine;
 
 public class AnimalMover
 {
-    private IAnimal?[,] _gameField;
+    private IGameField _gameField;
     private readonly FieldDisplayer _fieldDisplayer;
     private static readonly Random random = new();
 
-    public AnimalMover(IAnimal?[,] gameField, FieldDisplayer fieldDisplayer)
+    public AnimalMover(IGameField gameField, FieldDisplayer fieldDisplayer)
     {
         _gameField = gameField;
         _fieldDisplayer = fieldDisplayer;
@@ -26,12 +25,12 @@ public class AnimalMover
         Direction direction = GetMovementDirection(animal);
         Direction newPosition = GetNewPosition(animal, direction);
 
-        if (_gameField[newPosition.X, newPosition.Y] == null)
+        if (_gameField.GetState(newPosition.X, newPosition.Y) == null)
         {
-            _gameField[animal.X, animal.Y] = null;
+            _gameField.SetState(animal.X, animal.Y, null);
             animal.X = newPosition.X;
             animal.Y = newPosition.Y;
-            _gameField[animal.X, animal.Y] = animal;
+            _gameField.SetState(animal.X, animal.Y, animal);
         }
     }
 
@@ -48,7 +47,8 @@ public class AnimalMover
         {
             for (int j = Math.Max(0, animal.Y - animal.VisionRange); j <= Math.Min(_fieldDisplayer.Size.Width - 1, animal.Y + animal.VisionRange); j++)
             {
-                var otherAnimal = _gameField[i, j];
+                var otherAnimal = _gameField.GetState(i, j) as IAnimal;
+
                 if (otherAnimal != null && otherAnimal.GetType() != animal.GetType())
                 {
                     var otherDirection = animal.GetDirectionTo(otherAnimal);

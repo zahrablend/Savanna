@@ -1,4 +1,5 @@
-﻿using Common.Interfaces;
+﻿
+using Common.Interfaces;
 
 namespace LionBehaviour
 {

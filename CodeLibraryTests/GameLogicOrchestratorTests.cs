@@ -1,4 +1,6 @@
-﻿namespace CodeLibraryTests;
+﻿using CodeLibrary.Interfaces;
+
+namespace CodeLibraryTests;
 
 public class GameLogicOrchestratorTests
 {

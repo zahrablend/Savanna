@@ -23,13 +23,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Savanna.Web", "Savanna.Web\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Savanna.Infrastructure", "Savanna.Infrastructure\Savanna.Infrastructure.csproj", "{5A0DE764-F68E-4270-9502-4428097558C9}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Domain", "Domain", "{EF606CD3-EE7B-4A4E-A000-467E209E24ED}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{EF606CD3-EE7B-4A4E-A000-467E209E24ED}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{2FD37325-070B-4290-9738-BABA82868E3A}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Application", "Application", "{2FD37325-070B-4290-9738-BABA82868E3A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{04E77B25-2F82-4846-9D72-515DBE803CF5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Savanna.ConsoleApp", "Savanna.ConsoleApp\Savanna.ConsoleApp.csproj", "{1DC09A62-C344-4EA6-9597-1257E33D3B33}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Savanna.ConsoleApp", "Savanna.ConsoleApp\Savanna.ConsoleApp.csproj", "{1DC09A62-C344-4EA6-9597-1257E33D3B33}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

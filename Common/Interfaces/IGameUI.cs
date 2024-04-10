@@ -1,6 +1,6 @@
 ﻿namespace Common.Interfaces;
 
-public interface IGameUI
+public interface IGameUI : IGameStateSender
 {
     void Display(string message);
     void Clear();

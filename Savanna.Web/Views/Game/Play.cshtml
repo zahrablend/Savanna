@@ -4,107 +4,99 @@
     ViewBag.Title = "Play";
 }
 
-<div class="text-center mb-3">
-    @* <h1 class="display-4" style="margin: auto;">Game @Model.GameId</h1> *@
+
+<div class="d-flex justify-content-center mb-3">
+    <button class="btn btn-outline-dark btn-lg mr-2" style="width: 200px;" onclick="toggleDisplay('symbol')">
+        Animal As Symbol
+    </button>
+    <button class="btn btn-outline-dark btn-lg ml-2" style="width: 200px;" onclick="toggleDisplay('icon')">
+        Animal As Icon
+    </button>
 </div>
 
-<div>
+
+<div class="container border" style="padding:20px">
+    <pre id="gameField">@ViewBag.GameField</pre>
+    <p>Add animal to game field. Press S to skip.</p>
+    <div id="animalButtons"></div>
     <div class="d-flex justify-content-center mb-3">
-        <button class="btn btn-outline-dark btn-lg mr-2" style="width: 200px;" onclick="toggleDisplay('symbol')">
-            Animal As Symbol
+        <button id="skipButton" class="btn btn-outline-dark btn-lg mr-2" style="width: 200px;">S</button>
+        <button id="startGameButton" class="btn btn-outline-dark btn-lg ml-2" style="width: 200px;">Start Game</button>
+    </div>
+</div>
+
+
+<div class="d-flex flex-column align-items-center mb-3">
+    <form method="post" action="@Url.Action("SaveGame", "Game")">
+        <input type="hidden" name="Id" value="@Model.GameId" />
+        <input type="hidden" name="Name" value="@Model.Name" />
+        <input type="hidden" name="GameState" value="@Model.GameState" />
+        <input type="hidden" name="GameIteration" value="@Model.GameIteration" />
+        <button type="submit" class="btn btn-outline-dark btn-lg" style="width: 200px;">
+            Save Game
         </button>
-        <button class="btn btn-outline-dark btn-lg ml-2" style="width: 200px;" onclick="toggleDisplay('icon')">
-            Animal As Icon
-        </button>
-    </div>
-    <div class="container border" style="padding:20px">
-        <pre>@ViewBag.GameField</pre>
-        <pre>@ViewBag.GameState</pre>
-    </div>
-@*     <div class="d-flex flex-column align-items-center mb-3">
-        <form method="post" action="@Url.Action("SaveGame", "Game")">
-            <input type="hidden" name="GameId" value="@Model.GameId" />
-            <input type="hidden" name="GameState" value="@Model.GameState" />
-            <input type="hidden" name="Name" value="@Model.Name" />
-            <button type="submit" class="btn btn-outline-dark btn-lg" style="width: 200px;">
-                Save Game
-            </button>
-        </form>
-    </div>
-</div> *@
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        // Fetch animal types and create buttons
+        $.get('/Game/GetAnimalTypes', function (animalTypes) {
+            animalTypes.forEach(function (animalType) {
+                var button = $('<button>').addClass('btn btn-outline-dark btn-lg ml-2 mr-2').css('width', '50px').text(`${animalType}`);
+                button.click(function () {
+                    console.log(animalType);
+                    $.post('/Game/AddAnimal', { animalType: animalType }, function (updatedGameField) {
+                        $('#gameField').text(updatedGameField);
+                    });
+                });
+                $('#animalButtons').append(button);
+            });
+        });
+
+    </script>
+}
 
 @* @section Scripts {
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.js"></script>
+    <script>
+
+
+        // Handle 'Skip' button click
+        $('#skipButton').click(function () {
+            // Move to the next animal type or enable the 'Start Game' button if all animals have been added
+            // This logic will depend on how you're tracking the current animal type on the client side
+        });
+
+        // Handle 'StartGame' button click
+        $('#startGameButton').click(function () {
+            // Make AJAX call to start the game
+        });
+
+        function addAnimal(animalType) {
+            $.post('/Game/AddAnimal', { animalType: animalType }, function (updatedGameState) {
+                $('#gameField').text(updatedGameState);
+            });
+        }
+    </script>
+}
+ *@
+    @* <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.js"></script>
     <script>
         var connection = new signalR.HubConnectionBuilder().withUrl("/gameHub").build();
 
         connection.on("Display", function (gameState) {
-            document.getElementById("gameField").innerText = gameState;
+            document.querySelector("pre").textContent = gameState;
         });
 
-        connection.start().then(function () {
-            connection.invoke("RequestGameState").catch(function (err) {
+        connection.start().catch(function (err) {
+            return console.error(err.toString());
+        });
+
+        document.addEventListener("keydown", function (event) {
+            connection.invoke("SendKeyPress", event.key).catch(function (err) {
                 return console.error(err.toString());
             });
-        }).catch(function (err) {
-            return console.error(err.toString());
+            event.preventDefault();
         });
-    </script>
-}
- *@
-@* <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.js"></script>
-<script>
-    window.onload = function () {
-        setInterval(fetchGameState, 1000);  // Fetch game state every 1000 milliseconds (1 second)
-    }
-
-    function fetchGameState() {
-        fetch('/game/state')
-            .then(response => response.text())
-            .then(gameState => {
-                const gameField = document.getElementById("gameField");
-                gameField.textContent = gameState;
-            });
-    }
-
-    var connection = new signalR.HubConnectionBuilder().withUrl("/gameHub").build();
-
-    // window.onload = function () {
-    //     connection.start()
-    //         .then(() => {
-    //             console.log('Connection started');
-    //             connection.invoke("RequestGameState").catch(err => console.error(err.toString()));
-    //         })
-    //         .catch(err => console.error('Error while starting connection: ' + err));
-
-    //added start
-    connection.start()
-        .then(() => {
-            console.log('Connection started');
-            connection.invoke("RequestGameState").catch(err => console.error(err.toString()));
-        })
-        .catch(err => console.error('Error while starting connection: ' + err));
-
-    connection.on("Display", function (message) {
-        console.log('Received message: ' + message);
-        const gameField = document.getElementById("gameField");
-        gameField.textContent = message;
-    });
-
-    document.addEventListener("keydown", function (event) {
-        connection.invoke("SendKeyPress", event.key).catch(function (err) {
-            return console.error(err.toString());
-        });
-    });
-
-        function toggleDisplay(type) {
-            var animals = document.getElementsByClassName('animal');
-            for (var i = 0; i < animals.length; i++) {
-                if (type == 'symbol') {
-                    animals[i].innerText = animals[i].getAttribute('data-symbol');
-                } else if (type == 'icon') {
-                    animals[i].innerHTML = '<img src="' + animals[i].getAttribute('data-icon') + '" />';
-                }
-            }
-        }
-</script> *@
+    </script> 
+}*@

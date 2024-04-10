@@ -4,13 +4,13 @@ namespace CodeLibrary.GameEngine;
 
 public class AnimalRemover
 { 
-    private IAnimal?[,] _gameField;
-    private List<IAnimal> _animals;
+    private IGameField _gameField;
+    private GameSetup _gameSetup;
 
-    public AnimalRemover(IAnimal?[,] gameField, List<IAnimal> animals)
+    public AnimalRemover(IGameField gameField, GameSetup gameSetup)
     {
         _gameField = gameField;
-        _animals = animals;
+        _gameSetup = gameSetup;
     }
 
     /// <summary>
@@ -21,8 +21,8 @@ public class AnimalRemover
     {
         if (animal.Health <= 0)
         {
-            _gameField[animal.X, animal.Y] = null;
-            _animals.Remove(animal);
+            _gameField.SetState(animal.X, animal.Y, null);
+            _gameSetup.GetAnimals.Remove(animal);
         }
     }
 }

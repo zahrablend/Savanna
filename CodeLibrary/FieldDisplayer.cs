@@ -34,15 +34,15 @@ public class FieldDisplayer
     /// <param name="fieldHeight">The height of the game field.</param>
     /// <param name="fieldWidth">The width of the game field.</param>
     /// <returns>A string representation of the game field.</returns>
-    public string DrawField(IAnimal[,] gameField, int fieldHeight, int fieldWidth)
+    public string DrawField(IGameField gameField, int fieldHeight, int fieldWidth)
     {
         var sb = new StringBuilder();
         for (int i = 0; i < fieldHeight; i++)
         {
             for (int j = 0; j < fieldWidth; j++)
             {
-                var animal = gameField[i, j];
-                if (animal != null)
+                var state = gameField.GetState(i, j);
+                if (state is IAnimal animal)
                 {
                     sb.Append(animal.Symbol);
                 }

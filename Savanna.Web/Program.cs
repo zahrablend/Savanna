@@ -1,5 +1,5 @@
 using CodeLibrary;
-using CodeLibrary.Interfaces;
+using CodeLibrary.GameEngine;
 using Common.Identity;
 using Common.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Savanna.Infrastructure;
-using Savanna.Web.Controllers;
 using Savanna.Web.Services;
 
 namespace Savanna.Web
@@ -49,13 +48,19 @@ namespace Savanna.Web
                 options.LoginPath = "/Account/login";
             });
 
-            builder.Services.AddScoped<WebGameUI>();
-            builder.Services.AddScoped<IGameRunner, WebGameRunner>();
-            builder.Services.AddScoped<IGameUI, WebGameUI>();
-            builder.Services.AddScoped<IGameEventService, WebGameUI>();
-            builder.Services.AddScoped<Game>();
-            builder.Services.AddScoped<IGameRepository, GameRepository>();
+            builder.Services.AddScoped<IGameFieldFactory, AnimalGameFieldFactoryService>();
             builder.Services.AddScoped<GameService>();
+            builder.Services.AddScoped<IGameRunner, WebGameRunnerService>();
+            builder.Services.AddScoped<IGameUI, WebGameUIService>();
+            builder.Services.AddScoped<IGameEventService, WebGameUIService>();
+            builder.Services.AddScoped<UserManager<ApplicationUser>>();
+            builder.Services.AddScoped<Func<Task>>(provider => () => Task.CompletedTask);
+            builder.Services.AddScoped<IGameRunningCallback>(provider =>
+            {
+                var func = provider.GetRequiredService<Func<Task>>();
+                return new GameRunningCallbackService(func);
+            });
+            builder.Services.AddScoped<IGameRepository, GameRepository>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

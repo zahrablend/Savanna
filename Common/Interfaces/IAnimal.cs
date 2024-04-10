@@ -1,4 +1,6 @@
-﻿namespace Common.Interfaces;
+﻿using Common.ValueObjects;
+
+namespace Common.Interfaces;
 
 public interface IAnimal
 {

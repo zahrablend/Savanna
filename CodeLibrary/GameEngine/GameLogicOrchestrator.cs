@@ -1,12 +1,10 @@
-﻿using CodeLibrary.Constants;
-using Common.Interfaces;
+﻿using Common.Interfaces;
 
 namespace CodeLibrary.GameEngine;
 
 public class GameLogicOrchestrator
 {
-    private IAnimal?[,] _gameField;
-    private List<IAnimal> _animals;
+    private IGameField _gameField;
     private readonly FieldDisplayer _fieldDisplayer;
     private AnimalMover _animalMover;
     private HealthMetricCounter _healthMetricCounter;
@@ -15,36 +13,15 @@ public class GameLogicOrchestrator
 
     public GameLogicOrchestrator() { }
 
-    public GameLogicOrchestrator(FieldDisplayer fieldDisplayer)
+    public GameLogicOrchestrator(FieldDisplayer fieldDisplayer, IGameFieldFactory gameFieldFactory, GameSetup gameSetup)
     {
         _fieldDisplayer = fieldDisplayer;
-        _gameField = new IAnimal[_fieldDisplayer.Size.Height, _fieldDisplayer.Size.Width];
-        _animals = new List<IAnimal>();
-
-        // Initialize the objects
+        _gameField = gameFieldFactory.Create(_fieldDisplayer.Size.Height, _fieldDisplayer.Size.Width);
+        
         _animalMover = new AnimalMover(_gameField, fieldDisplayer);
         _healthMetricCounter = new HealthMetricCounter(_gameField, fieldDisplayer);
-        _animalRemover = new AnimalRemover(_gameField, _animals);
-        _animalCreator = new AnimalCreator(this);
-    }
-
-    public virtual void AddAnimal(IAnimal animal)
-    {
-        int x;
-        int y;
-
-        do
-        {
-            x = new Random().Next(_fieldDisplayer.Size.Height);
-            y = new Random().Next(_fieldDisplayer.Size.Width);
-        }
-        while (_gameField[x, y] != null);
-
-        animal.X = x;
-        animal.Y = y;
-        animal.Health = Constant.InitialHealth;
-        _gameField[x, y] = animal;
-        _animals.Add(animal);
+        _animalRemover = new AnimalRemover(_gameField, gameSetup);
+        _animalCreator = new AnimalCreator(gameSetup);
     }
 
     public void PlayGame(IAnimal animal)
@@ -57,6 +34,5 @@ public class GameLogicOrchestrator
     }
 
     public string DrawField => _fieldDisplayer.DrawField(_gameField, _fieldDisplayer.Size.Height, _fieldDisplayer.Size.Width);
-    public List<IAnimal> GetAnimals => _animals;
-    public IAnimal[,] GetGameField => _gameField;
+    public IGameField GetGameField => _gameField;
 }

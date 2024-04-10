@@ -33,5 +33,10 @@ namespace Savanna.ConsoleApp
         {
             return null;
         }
+
+        public void SendGameState(string gameState)
+        {
+            
+        }
     }
 }

@@ -1,158 +1,136 @@
-﻿using CodeLibrary.Interfaces;
-using CodeLibrary;
+﻿using CodeLibrary;
 using Microsoft.AspNetCore.Mvc;
 using Savanna.Web.Services;
-using Savanna.Web.Models;
 using Common.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Common.Entities;
-using System.Security.Claims;
 using static CodeLibrary.FieldDisplayer;
-using Newtonsoft.Json;
-using Microsoft.AspNetCore.SignalR;
 using Savanna.Infrastructure;
+using Savanna.Web.Models;
+using CodeLibrary.GameEngine;
+using Common.Entities;
+using Common.Identity;
+using Microsoft.AspNetCore.Identity;
 
 namespace Savanna.Web.Controllers;
 
-[AllowAnonymous]
+[Authorize]
 public class GameController : Controller
 {
-    private readonly IGameRunner _gameRunner;
-    private readonly WebGameUI _gameUI;
+    private Game _game;
+    private IGameRunner _gameRunner;
+    private IGameUI _gameUI;
+    private GameSetup _gameSetup;
+    private IGameRunningCallback _gameRunningCallback;
+    private readonly GameService _gameService;
+    private readonly UserManager<ApplicationUser> _userManager;
 
-    public GameController(IGameRunner gameRunner, WebGameUI gameUI)
+    public GameController(IGameFieldFactory gameFieldFactory, GameService gameService, UserManager<ApplicationUser> userManager, IGameRunningCallback gameRunningCallback)
     {
-        _gameRunner = gameRunner;
-        _gameUI = gameUI;
-    }
-    public async Task<IActionResult> Play()
-    {
-        // Create a new game
-        GameEntity gameEntity = new GameEntity();
-        Game game = new Game(_gameUI); // Initialize the Game with the IGameUI instance
-
-        // Create a new FieldDisplayer
-        FieldDisplayer fieldDisplayer = new FieldDisplayer();
-        fieldDisplayer.Size = new FieldSize(20, 100); // Set your field size here
-
-        // Initialize your game field here
-        IAnimal[,] gameField = new IAnimal[fieldDisplayer.Size.Height, fieldDisplayer.Size.Width];
-
-        // No need to fill your game field with animals, it will be filled with nulls by default
-
-        // Display the initial game field
-        ViewBag.GameField = fieldDisplayer.DrawField(gameField, fieldDisplayer.Size.Height, fieldDisplayer.Size.Width);
-
-        // Run the game
-        await game.Run();
-
-        // Get the updated game state
-        string gameState = _gameUI.GetLastGameState();
-
-        // Store the game state
-        gameEntity.GameState = JsonConvert.SerializeObject(gameState);
-
-        return View();
+        _gameService = gameService;
+        _userManager = userManager;
+        _gameRunner = new WebGameRunnerService();
+        _gameRunningCallback = gameRunningCallback;
+        IGameField gameField = gameFieldFactory.Create(20, 100);
+        _gameSetup = new GameSetup(gameFieldFactory, new FieldDisplayer());
+        var animalFactoryLoader = new AnimalFactoryLoader();
+        _gameUI = new WebGameUIService();
+        _game = new Game(_gameUI, _gameRunner, gameFieldFactory, animalFactoryLoader, _gameSetup, _gameRunningCallback);
+        _gameRunner.SetGameRunningCallback(_gameRunningCallback);
+        _gameRunningCallback.UpdateCallback(_game.Run);
     }
 
 
-    //private Game _game;
-    //private IGameRunner _gameRunner;
-    //private readonly GameService _gameService;
-
-    //public GameController(IGameUI gameUI, GameService gameService)
-    //{
-    //        _game = new Game(gameUI, gameStateSender);
-    //        _gameRunner = new WebGameRunner();
-    //        _gameService = gameService;
-    //}
-
-    //[Route("game/play")]
-    //[HttpGet]
-    //public async Task<IActionResult> Play(bool isNewGame, int id = 0)
-    //{
-    //    GameEntity gameEntity;
-    //    var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-    //    if (isNewGame)
-    //    {
-    //        await _gameRunner.Run(_game);
-    //        var gameUI = (WebGameUI)_game.GetGameUI();
-    //        var gameName = $"Game_{userId}_{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
-    //        gameEntity = new GameEntity(userId)
-    //        {
-    //            Name = gameName,
-    //            GameState = gameUI.GetLastGameState(),
-    //            GameIteration = _game.GameIteration
-    //    };
-    //    }
-    //    else
-    //    {
-    //        gameEntity = await _gameService.LoadGameState(id);
-    //        _game.SetState(gameEntity.GameState);
-    //        _game.SetIteration(gameEntity.GameIteration);
-    //    }
-
-    //    var viewModel = new GameViewModel
-    //    {
-    //        GameId = gameEntity.Id,
-    //        GameState = gameEntity.GameState,
-    //        Name = gameEntity.Name,
-    //        GameIteration = gameEntity.GameIteration
-    //    };
-
-    //    if (isNewGame)
-    //    {
-    //        return View(viewModel);
-    //    }
-    //    else
-    //    {
-    //        var savedGames = await _gameService.GetSavedGames(userId);
-    //        if (!savedGames.Any())
-    //        {
-    //            TempData["Message"] = "There are no saved games yet.";
-    //            return RedirectToAction(nameof(HomeController.Index), "Home");
-    //        }
-    //        else
-    //        {
-    //            return PartialView("_LoadGame", savedGames);
-
-    //        }
-    //    }
-    //}
+    [HttpGet]
+    public IActionResult GetAnimalTypes()
+    {
+        var animalTypes = _game.GetAnimalTypes();
+        return Ok(animalTypes);
+    }
 
 
-    //[HttpPost]
-    //[Route("game/save")]
-    //public async Task<IActionResult> SaveGame(GameViewModel model)
-    //{
-    //    var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    public IActionResult Play(bool isNewGame = false)
+    {
+        _game.SetFieldDisplayerSize(20, 100);
+        List<char> animalTypes = _game.GetAnimalTypes();
 
-    //    if (!Guid.TryParse(userIdString, out var userId))
-    //    {
-    //        ModelState.AddModelError("", "Invalid user ID");
-    //        return View(model);
-    //    }
+        if (animalTypes.Count > 0)
+        {
+            string animalType = animalTypes[0].ToString();
 
-    //    var gameName = $"Game_{userId}_{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
+            if (!_game.AnimalFactories.TryGetValue(animalType[0], out var factoryInfo))
+            {
+                return BadRequest($"No animal factory found for animal type '{animalType}'");
+            }
 
-    //    var gameEntity = new GameEntity(userId)
-    //    {
-    //        Id = model.GameId,
-    //        Name = gameName,
-    //        GameState = model.GameState,
-    //        GameIteration = model.GameIteration
-    //    };
-    //    await _gameService.SaveGameState(gameEntity);
-    //    return RedirectToAction(nameof(HomeController.Index), "Home");
-    //}
+            IAnimalFactory factory = factoryInfo.factory;
+            IAnimal animal = factory.Create();
 
-    ////text
-    //[HttpGet]
-    //[Route("game/state")]
-    //public IActionResult GetGameState()
-    //{
-    //    var gameUI = (WebGameUI)_game.GetGameUI();
-    //    var gameState = gameUI.GetLastGameState();
-    //    return Ok(gameState);
-    //}
+            _game.GameSetup.AddAnimal(animal);
+        }
+
+       
+        ViewBag.GameField = _game.FieldDisplayer.DrawField(_game.GameField, _game.FieldDisplayer.Size.Height, _game.FieldDisplayer.Size.Width);
+        var gameViewModel = new GameViewModel
+        {
+            GameId = _game.GameId,
+            GameState = _game.GameState,
+            Name = _game.Name,
+            GameIteration = _game.GameIteration
+        };
+        return View(gameViewModel);
+    }
+
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult AddAnimal(string animalType)
+{
+    // Check if there's a factory for the given animal type
+    if (!_game.AnimalFactories.TryGetValue(animalType[0], out var factoryInfo))
+    {
+        return BadRequest($"No animal factory found for animal type '{animalType}'");
+    }
+
+    // Create an animal of the given type
+    IAnimalFactory factory = factoryInfo.factory;
+    IAnimal animal = factory.Create();
+
+    // Add the animal to the game field
+    _game.GameSetup.AddAnimal(animal);
+
+    // Get the updated game field
+    var updatedGameField = _game.GameSetup.GetGameField();
+
+    return Ok(updatedGameField);
+}
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> StartGame()
+    {
+        await _game.Run();
+        return Ok();
+    }
+
+    [HttpGet]
+    public IActionResult GetGameField()
+    {
+        _game.UpdateGameState();
+        return Ok(_game.GameState);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SaveGame()
+    {
+        var gameEntity = new GameEntity
+        {
+            Id = _game.GameId,
+            Name = _game.Name,
+            GameState = _game.GameState,
+            GameIteration = _game.GameIteration
+        };
+        await _gameService.SaveGameState(gameEntity);
+        return Ok();
+    }
 }
