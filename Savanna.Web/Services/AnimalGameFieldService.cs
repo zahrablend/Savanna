@@ -13,12 +13,12 @@ public class AnimalGameFieldService : IGameField
 
     public void SetState(int x, int y, object state)
     {
-        _field[x, y] = (IAnimal)state;
+        _field[y, x] = (IAnimal)state;
     }
 
     public object GetState(int x, int y)
     {
-        return _field[x, y];
+        return _field[y, x];
     }
 
     public void Initialize(object initialState)

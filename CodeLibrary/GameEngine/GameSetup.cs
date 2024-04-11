@@ -21,23 +21,22 @@ public class GameSetup
 
     public void AddAnimal(IAnimal animal)
     {
-        if (_gameField.FreeLocations.Count > 0)
-        {
-            var random = new Random();
-            var index = random.Next(_gameField.FreeLocations.Count);
-            var (y, x) = _gameField.FreeLocations[index];
+        int x;
+        int y;
 
-            animal.X = x;
-            animal.Y = y;
-            animal.Health = Constant.InitialHealth;
-
-            _gameField.SetState(x, y, animal);
-            _animals.Add(animal);
-        }
-        else
+        do
         {
-            throw new InvalidOperationException("No free locations available on the game field.");
+            x = new Random().Next(_fieldDisplayer.Size.Height);
+            y = new Random().Next(_fieldDisplayer.Size.Width);
         }
+        while (_gameField.GetState(x, y) != null);
+
+        animal.X = x;
+        animal.Y = y;
+        animal.Health = Constant.InitialHealth;
+
+        _gameField.SetState(x, y, animal);
+        _animals.Add(animal);
     }
 
     public string GetGameField()
