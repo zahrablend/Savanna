@@ -15,11 +15,7 @@ public class AnimalMover
         _fieldDisplayer = fieldDisplayer;
     }
 
-    /// <summary>
-    /// Moves the specified animal to a new position in the game field.
-    /// The new position is determined based on the animal's movement direction.
-    /// If the new position is not occupied by another animal, the animal is moved to the new position.    /// </summary>
-    /// <param name="animal">The animal to move.</param>
+
     public void MoveAnimal(IAnimal animal)
     {
         Direction direction = GetMovementDirection(animal);
@@ -27,10 +23,10 @@ public class AnimalMover
 
         if (_gameField.GetState(newPosition.X, newPosition.Y) == null)
         {
-            _gameField.SetState(animal.X, animal.Y, null);
+            _gameField.SetState(animal.X, animal.Y, new FieldCell { State = null });
             animal.X = newPosition.X;
             animal.Y = newPosition.Y;
-            _gameField.SetState(animal.X, animal.Y, animal);
+            _gameField.SetState(animal.X, animal.Y, new FieldCell { State = animal });
         }
     }
 
@@ -42,7 +38,6 @@ public class AnimalMover
             Y = random.Next(-animal.Speed, animal.Speed + 1)
         };
 
-        // Check for other animals within the vision range
         for (int i = Math.Max(0, animal.X - animal.VisionRange); i <= Math.Min(_fieldDisplayer.Size.Height - 1, animal.X + animal.VisionRange); i++)
         {
             for (int j = Math.Max(0, animal.Y - animal.VisionRange); j <= Math.Min(_fieldDisplayer.Size.Width - 1, animal.Y + animal.VisionRange); j++)
@@ -60,13 +55,6 @@ public class AnimalMover
         return direction;
     }
 
-    /// <summary>
-    /// Calculates the new position of an animal based on its current position and the direction of movement.
-    /// </summary>
-    /// <param name="animal">The animal for which to calculate the new position.</param>
-    /// <param name="dx">The movement direction on the x-axis.</param>
-    /// <param name="dy">The movement direction on the y-axis.</param>
-    /// <returns>A tuple of integers representing the new position on the x and y axes.</returns>
     private Direction GetNewPosition(IAnimal animal, Direction direction)
     {
         Direction newPosition = new()
@@ -74,9 +62,7 @@ public class AnimalMover
             X = (animal.X + direction.X),
             Y = (animal.Y + direction.Y)
         };
-        
 
-        // Ensure the new position is within the game field boundaries
         if (newPosition.X < 0) newPosition.X = 0;
         if (newPosition.X >= _fieldDisplayer.Size.Height) newPosition.X = _fieldDisplayer.Size.Height - 1;
         if (newPosition.Y < 0) newPosition.Y = 0;

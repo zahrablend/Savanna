@@ -3,16 +3,27 @@ using Common.ValueObjects;
 
 namespace LionBehaviour;
 
-public class Lion : IAnimal, IPredator
+public class Lion : Animal, IAnimal, IPredator
 {
+    private static int animalId = 1;
+    private int _offspring;
     public int X { get; set; }
     public int Y { get; set; }
     public int Speed { get; init; } = 3;
     public int VisionRange { get; init; } = 4;
+    public int Age { get; set; }
     public double Health { get; set; }
-    public string Name => "Lion";
-    public char Symbol => 'L';
-    public Lion() { }
+    public string Species => "Lion";
+    public override char Symbol => 'L';
+
+    public override string Icon => "🦁";
+    public int Offspring => _offspring;
+
+    public Lion()
+    {
+        Id = animalId++;
+        _offspring = 0;
+    }
 
     public Direction GetDirectionTo(IAnimal other)
     {
@@ -38,5 +49,10 @@ public class Lion : IAnimal, IPredator
             Health += 1;
             other.Health = 0;
         }
+    }
+
+    public void IncrementOffspringCount()
+    {
+        _offspring++;
     }
 }

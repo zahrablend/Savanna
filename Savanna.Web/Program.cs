@@ -1,7 +1,8 @@
-using CodeLibrary;
 using CodeLibrary.GameEngine;
+using CodeLibrary;
 using Common.Identity;
 using Common.Interfaces;
+using Common.ValueObjects;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -22,7 +23,6 @@ namespace Savanna.Web
             {
                 options.Conventions.AddAreaPageRoute("Identity", "Account/Login", "");
             });
-            builder.Services.AddSignalR();
             builder.Services.AddDbContext<GameContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -48,18 +48,44 @@ namespace Savanna.Web
                 options.LoginPath = "/Account/login";
             });
 
-            builder.Services.AddScoped<IGameFieldFactory, AnimalGameFieldFactoryService>();
-            builder.Services.AddScoped<GameService>();
-            builder.Services.AddScoped<IGameRunner, WebGameRunnerService>();
-            builder.Services.AddScoped<IGameUI, WebGameUIService>();
-            builder.Services.AddScoped<IGameEventService, WebGameUIService>();
-            builder.Services.AddScoped<UserManager<ApplicationUser>>();
-            builder.Services.AddScoped<Func<Task>>(provider => () => Task.CompletedTask);
-            builder.Services.AddScoped<IGameRunningCallback>(provider =>
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession(options =>
             {
-                var func = provider.GetRequiredService<Func<Task>>();
-                return new GameRunningCallbackService(func);
+                options.IdleTimeout = TimeSpan.FromSeconds(10);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
             });
+
+            builder.Services.AddSingleton<IGameFieldFactory, GameFieldFactory>();
+            builder.Services.AddSingleton<AnimalFactoryLoader>();
+            builder.Services.AddSingleton(sp =>
+            {
+                var gameRepository = sp.GetRequiredService<IGameRepository>();
+                var gameFieldFactory = sp.GetRequiredService<IGameFieldFactory>();
+                var animalFactoryLoader = sp.GetRequiredService<AnimalFactoryLoader>();
+                return new GameService(gameRepository, gameFieldFactory, animalFactoryLoader);
+            });
+
+            builder.Services.AddScoped<IAnimalRepository, AnimalRepository>();
+            builder.Services.AddScoped(sp =>
+            {
+                var gameRepository = sp.GetRequiredService<IGameRepository>();
+                var animalRepository = sp.GetRequiredService<IAnimalRepository>();
+                return new StatisticsService(gameRepository, animalRepository);
+            });
+
+            builder.Services.AddSingleton(sp =>
+            {
+                var gameField = sp.GetRequiredService<IGameField>();
+                var animalDict = new AnimalDictionary();
+                return new GameSetup(gameField, animalDict);
+            });
+
+            builder.Services.AddSingleton(sp => sp.GetRequiredService<GameService>().GameField);
+            builder.Services.AddSingleton<AnimalService>();
+            builder.Services.AddSingleton<UserManager<ApplicationUser>>();
+            builder.Services.AddSingleton<Func<Task>>(provider => () => Task.CompletedTask);
+
             builder.Services.AddScoped<IGameRepository, GameRepository>();
             var app = builder.Build();
 

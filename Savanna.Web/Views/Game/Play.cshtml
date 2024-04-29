@@ -1,4 +1,4 @@
-﻿@model GameViewModel
+﻿@model string
 
 @{
     ViewBag.Title = "Play";
@@ -16,12 +16,29 @@
 
 
 <div class="container border" style="padding:20px">
-    <pre id="gameField">@ViewBag.GameField</pre>
+    <pre id="gameField">@Model</pre>
     <p>Add animal to game field. Press S to skip.</p>
     <div id="animalButtons"></div>
     <div class="d-flex justify-content-center mb-3">
-        <button id="skipButton" class="btn btn-outline-dark btn-lg mr-2" style="width: 200px;">S</button>
+        <button id="pauseButton" class="btn btn-outline-dark btn-lg mr-2" style="width: 200px;">S</button>
         <button id="startGameButton" class="btn btn-outline-dark btn-lg ml-2" style="width: 200px;">Start Game</button>
+    </div>
+</div>
+
+
+<div id="animalStatsModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Animal's statistics</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Animal's statistics will be inserted here -->
+            </div>
+        </div>
     </div>
 </div>
 
@@ -29,7 +46,7 @@
 <div class="d-flex flex-column align-items-center mb-3">
     <form method="post" action="@Url.Action("SaveGame", "Game")">
         <input type="hidden" name="Id" value="@Model.GameId" />
-        <input type="hidden" name="Name" value="@Model.Name" />
+        <input type="hidden" name="Name" value="@Model.Species" />
         <input type="hidden" name="GameState" value="@Model.GameState" />
         <input type="hidden" name="GameIteration" value="@Model.GameIteration" />
         <button type="submit" class="btn btn-outline-dark btn-lg" style="width: 200px;">
@@ -40,63 +57,92 @@
 
 @section Scripts {
     <script>
-        // Fetch animal types and create buttons
-        $.get('/Game/GetAnimalTypes', function (animalTypes) {
-            animalTypes.forEach(function (animalType) {
-                var button = $('<button>').addClass('btn btn-outline-dark btn-lg ml-2 mr-2').css('width', '50px').text(`${animalType}`);
-                button.click(function () {
-                    console.log(animalType);
-                    $.post('/Game/AddAnimal', { animalType: animalType }, function (updatedGameField) {
-                        $('#gameField').text(updatedGameField);
+        // Add toggle functionality
+        var displayAsIcon = false;
+
+        function toggleDisplay(displayType) {
+            displayAsIcon = (displayType === 'icon');
+            $('#animalButtons').empty();
+
+            // Fetch animal types and create buttons
+            $.get('/Game/GetAnimalTypes', function (animalTypes) {
+                animalTypes.forEach(function (animalType) {
+                    var button = $('<button>').addClass('btn btn-outline-dark btn-lg ml-2 mr-2').css('width', '200px');
+                    button.text(displayAsIcon ? animalType.icon : animalType.symbol);
+                    button.click(function () {
+                        $.ajax({
+                            url: '/Game/AddAnimal',
+                            type: 'POST',
+                            data: { 'animalType': animalType },
+                            success: function (updatedGameField) {
+                                $('#gameField').text(updatedGameField);
+                            }
+                        });
                     });
+                    $('#animalButtons').append(button);
                 });
-                $('#animalButtons').append(button);
-            });
-        });
-
-    </script>
-}
-
-@* @section Scripts {
-    <script>
-
-
-        // Handle 'Skip' button click
-        $('#skipButton').click(function () {
-            // Move to the next animal type or enable the 'Start Game' button if all animals have been added
-            // This logic will depend on how you're tracking the current animal type on the client side
-        });
-
-        // Handle 'StartGame' button click
-        $('#startGameButton').click(function () {
-            // Make AJAX call to start the game
-        });
-
-        function addAnimal(animalType) {
-            $.post('/Game/AddAnimal', { animalType: animalType }, function (updatedGameState) {
-                $('#gameField').text(updatedGameState);
             });
         }
+
+        // Call toggleDisplay when the page loads
+        $(document).ready(function () {
+            toggleDisplay('symbol');
+        });
+
+        //Display selected animal's statistics
+        $('.animal').on('click', function () {
+            $(this).toggleClass('highlight');
+
+            var animalSymbol = $(this).text();
+            $.get('/Game/GetAnimalStats', { symbol: animalSymbol }, function (data) {
+                $('#animalStatsModal .modal-body').html(data);
+                $('#animalStatsModal').modal('show');
+            });
+        });
+
+        // Show a confirmation dialog when the user tries to leave the page without saving the game
+        var isGameSaved = false;
+        $('form').on('submit', function () {
+            isGameSaved = true;
+        });
+        $(window).on('beforeunload', function () {
+            if (!isGameSaved) {
+                return "Game was not saved. If you close, game progress will not be saved";
+            }
+        });
+
+
+        // Update the gamefield on toggle
+        $('#gameField').html(newGameField);
+
+        $('.animal').on('click', function () {
+            $('.animal').removeClass('highlight');
+            $(this).toggleClass('highlight');
+        });
+
+        //Version 2:
+        // $(document).on('click', '.animal', function () {
+        //     $('.animal').removeClass('highlight');
+        //     $(this).toggleClass('highlight');
+        // });
+
+
+        //Start game
+        $(document).ready(function () {
+            $("#startGameButton").click(function () {
+                setInterval(function () {
+                    $.ajax({
+                        type: "POST",
+                        url: "/Game/StartGame",
+                        success: function (updatedGameField) {
+                            $('#gameField').text(updatedGameField);
+                        },
+                        error: function () {
+                            alert("Error while playing the game");
+                        }
+                    });
+                }, 1000);
+            });
+        });
     </script>
 }
- *@
-    @* <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.js"></script>
-    <script>
-        var connection = new signalR.HubConnectionBuilder().withUrl("/gameHub").build();
-
-        connection.on("Display", function (gameState) {
-            document.querySelector("pre").textContent = gameState;
-        });
-
-        connection.start().catch(function (err) {
-            return console.error(err.toString());
-        });
-
-        document.addEventListener("keydown", function (event) {
-            connection.invoke("SendKeyPress", event.key).catch(function (err) {
-                return console.error(err.toString());
-            });
-            event.preventDefault();
-        });
-    </script> 
-}*@

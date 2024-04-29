@@ -1,24 +1,20 @@
-﻿using Common.Interfaces;
+﻿using CodeLibrary.GameEngine;
+using Common.Interfaces;
 using System.Text;
+using static CodeLibrary.GameEngine.GameSetup;
 
 namespace CodeLibrary;
 
 public class FieldDisplayer
 {
-    public FieldSize Size {  get; set; }
-    /// <summary>
-    /// Represents the size of the field.
-    /// </summary>
+    public FieldSize Size { get; set; }
+    private readonly GameSetup _gameSetup;
+
     public struct FieldSize
     {
         public int Height { get; }
         public int Width { get; }
 
-        /// <summary>
-        /// Initializes a new instance of the FieldSize structure to the specified height and width.
-        /// </summary>
-        /// <param name="height">The height of the field.</param>
-        /// <param name="width">The width of the field.</param>
         public FieldSize(int height, int width)
         {
             Height = height;
@@ -26,25 +22,22 @@ public class FieldDisplayer
         }
     }
 
-    //Ignore the warning in this context
-    /// <summary>
-    /// Draws the game field as a string based on the current positions of the animals.
-    /// </summary>
-    /// <param name="gameField">The 2D array representing the game field.</param>
-    /// <param name="fieldHeight">The height of the game field.</param>
-    /// <param name="fieldWidth">The width of the game field.</param>
-    /// <returns>A string representation of the game field.</returns>
-    public string DrawField(IGameField gameField, int fieldHeight, int fieldWidth)
+    public FieldDisplayer(GameSetup gameSetup)
+    {
+        _gameSetup = gameSetup;
+    }
+
+    public string DrawField(IGameField gameField, int fieldHeight, int fieldWidth, DisplayType displayType)
     {
         var sb = new StringBuilder();
         for (int i = 0; i < fieldHeight; i++)
         {
             for (int j = 0; j < fieldWidth; j++)
             {
-                var state = gameField.GetState(i, j);
-                if (state is IAnimal animal)
+                var cell = gameField.GetState(j, i);
+                if (cell.State is IAnimal animal)
                 {
-                    sb.Append(animal.Symbol);
+                    sb.Append(_gameSetup.DisplayAnimalRepresentation(animal, displayType));
                 }
                 else
                 {

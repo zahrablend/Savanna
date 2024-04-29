@@ -5,10 +5,6 @@ namespace Savanna.ConsoleApp
 {
     public class ConsoleGameUI : IGameUI
     {
-        public void Clear()
-        {
-            Console.Clear();
-        }
 
         public void Display(string message)
         {
@@ -27,16 +23,6 @@ namespace Savanna.ConsoleApp
             }
             await Task.Delay(1000);
             return null;
-        }
-
-        public string GetLastGameState()
-        {
-            return null;
-        }
-
-        public void SendGameState(string gameState)
-        {
-            
         }
     }
 }

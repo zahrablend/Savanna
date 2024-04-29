@@ -1,4 +1,5 @@
-﻿using Common.Interfaces;
+﻿using Common.Factories;
+using Common.Interfaces;
 
 namespace CodeLibrary.GameEngine;
 
@@ -18,42 +19,7 @@ public class AnimalCreator
     /// </summary>
     public void CreateAnimalOnBirth()
     {
-        var animals = _gameSetup.GetAnimals;
-
-        for (int i = 0; i < animals.Count; i++)
-        {
-            for (int j = i + 1; j < animals.Count; j++)
-            {
-                var animal1 = animals[i];
-                var animal2 = animals[j];
-
-                if (animal1.GetType() == animal2.GetType() && AreNeighbours(animal1, animal2))
-                {
-                    var pair = (animal1, animal2);
-
-                    if (_consecutiveRounds.ContainsKey(pair))
-                    {
-                        _consecutiveRounds[pair]++;
-                    }
-                    else
-                    {
-                        _consecutiveRounds[pair] = 1;
-                    }
-
-                    if (_consecutiveRounds[pair] >= 3)
-                    {
-                        var newAnimal = (IAnimal)Activator.CreateInstance(animal1.GetType());
-                        _gameSetup.AddAnimal(newAnimal);
-                        _consecutiveRounds[pair] = 0;
-                    }
-                }
-                else
-                {
-                    _consecutiveRounds.Remove((animal1, animal2));
-                    _consecutiveRounds.Remove((animal2, animal1));
-                }
-            }
-        }
+        throw new NotImplementedException();
     }
 
     /// <summary>
