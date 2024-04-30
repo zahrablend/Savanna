@@ -28,6 +28,7 @@ public class ConsoleApp
         _animalDict = new AnimalDictionary();
         _animalOrder = new Queue<string>();
         _gameSetup = new GameSetup(gameField, _animalDict);
+        _gameField = gameField;
 
         string antelopeBehaviourPath = Environment.GetEnvironmentVariable("ANTELOPEBEHAVIOUR_PATH");
         var antelopeFactory = _animalFactoryLoader.LoadAnimalFactory(antelopeBehaviourPath, "AntelopeBehaviour.AntelopeFactory");
@@ -97,7 +98,6 @@ public class ConsoleApp
         }
         string animalSpecies = _animalOrder.Peek();
         IAnimalFactory animalFactory = _gameSetup.GetAnimalFactoryBySpecies(animalSpecies);
-        _gameSetup.AddAnimal(animalFactory);
         var count = _gameSetup.GetAnimalCount(animalSpecies);
         if (count >= 10)
         {
@@ -106,7 +106,7 @@ public class ConsoleApp
         }
         _consoleGameUI.Display($"Add {animalSpecies} to game field. Press first letter of Species to continue or S to skip.");
         ConsoleKey? key = await _consoleGameUI.GetKeyPress();
-        if (key.HasValue && key.Value.ToString().ToUpper() == animalSpecies.ToString().ToUpper())
+        if (key.HasValue && key.Value.ToString().ToUpper() == animalFactory.Symbol.ToString())
         {
             int indexX, indexY;
             do
