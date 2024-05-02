@@ -77,11 +77,29 @@ public class GameSetup
         Icon
     }
 
+    //public string DisplayAnimalRepresentation(IAnimal gameAnimal, DisplayType displayType)
+    //{
+    //    if (_animalDict.TryGetRepresentation(gameAnimal.Species, out AnimalRepresentation representation))
+    //    {
+    //        return displayType == DisplayType.Symbol ? $"{representation.Symbol}" : $"{representation.Icon}";
+    //    }
+    //    else
+    //    {
+    //        throw new KeyNotFoundException($"No representation found for species {gameAnimal.Species}");
+    //    }
+    //}
     public string DisplayAnimalRepresentation(IAnimal gameAnimal, DisplayType displayType)
     {
-        var (symbol, icon) = _animalDict[gameAnimal.Species];
-        return displayType == DisplayType.Symbol ? $"{symbol}" : $"{icon}";
+        if (_animalDict.TryGetRepresentation(gameAnimal.Species, out AnimalRepresentation representation))
+        {
+            return displayType == DisplayType.Symbol ? $"{representation.Symbol}" : $"{representation.Icon}";
+        }
+        else
+        {
+            throw new KeyNotFoundException($"No representation found for species {gameAnimal.Species}");
+        }
     }
+
 
     public IGameField GameField => _gameField;
 }

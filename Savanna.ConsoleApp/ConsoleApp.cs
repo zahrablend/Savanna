@@ -19,16 +19,17 @@ public class ConsoleApp
     private Queue<string> _animalOrder;
     private GameLogicOrchestrator _gameLogicOrchestrator;
 
-    public ConsoleApp(FieldDisplayer fieldDisplayer, AnimalFactoryLoader animalFactoryLoader, IGameUI gameUI, IGameField gameField, IGameUI consoleGameUI)
+    public ConsoleApp(FieldDisplayer fieldDisplayer, AnimalFactoryLoader animalFactoryLoader, IGameUI gameUI, IGameField gameField, IGameUI consoleGameUI, AnimalDictionary animalDict)
     {
         _animalFactoryLoader = animalFactoryLoader;
         _fieldDisplayer = fieldDisplayer;
         _consoleGameUI = consoleGameUI;
         _random = new Random();
-        _animalDict = new AnimalDictionary();
+        _animalDict = animalDict;
         _animalOrder = new Queue<string>();
         _gameSetup = new GameSetup(gameField, _animalDict);
         _gameField = gameField;
+        _gameLogicOrchestrator = new GameLogicOrchestrator(gameField, fieldDisplayer, _gameSetup);
 
         string antelopeBehaviourPath = Environment.GetEnvironmentVariable("ANTELOPEBEHAVIOUR_PATH");
         var antelopeFactory = _animalFactoryLoader.LoadAnimalFactory(antelopeBehaviourPath, "AntelopeBehaviour.AntelopeFactory");
@@ -85,7 +86,7 @@ public class ConsoleApp
                     _consoleGameUI.Display(Constant.CloseAppMessage);
                     break;
                 }
-            }
+            } 
         }
     }
 
@@ -108,19 +109,7 @@ public class ConsoleApp
         ConsoleKey? key = await _consoleGameUI.GetKeyPress();
         if (key.HasValue && key.Value.ToString().ToUpper() == animalFactory.Symbol.ToString())
         {
-            int indexX, indexY;
-            do
-            {
-                indexX = _random.Next(_gameField.Width);
-                indexY = _random.Next(_gameField.Height);
-            } while (!_gameField.GetState(indexX, indexY).IsEmpty);
-
-            IAnimal gameAnimal = animalFactory.Create();
-            gameAnimal.X = indexX;
-            gameAnimal.Y = indexY;
-            _gameField.SetState(indexX, indexY, new FieldCell { State = gameAnimal });
-
-            _gameSetup.AddAnimal(animalFactory);
+            IAnimal gameAnimal = _gameSetup.AddAnimal(animalFactory);
 
             string updatedGameState = _fieldDisplayer.DrawField(_gameField, _fieldDisplayer.Size.Height, _fieldDisplayer.Size.Width, GameSetup.DisplayType.Symbol);
             Console.Clear();

@@ -22,7 +22,7 @@ public static class Program
         AnimalFactoryLoader animalFactoryLoader = new AnimalFactoryLoader();
         IGameUI gameUI = new ConsoleGameUI();
         IGameUI consoleGameUI = new ConsoleGameUI();
-        ConsoleApp consoleApp = new ConsoleApp(fieldDisplayer, animalFactoryLoader, gameUI, gameField, consoleGameUI);
+        ConsoleApp consoleApp = new ConsoleApp(fieldDisplayer, animalFactoryLoader, gameUI, gameField, consoleGameUI, animalDict);
         await consoleApp.RunGame();
     }
 }

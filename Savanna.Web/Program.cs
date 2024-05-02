@@ -83,7 +83,6 @@ namespace Savanna.Web
 
             builder.Services.AddSingleton(sp => sp.GetRequiredService<GameService>().GameField);
             builder.Services.AddSingleton<AnimalService>();
-            builder.Services.AddSingleton<UserManager<ApplicationUser>>();
             builder.Services.AddSingleton<Func<Task>>(provider => () => Task.CompletedTask);
 
             builder.Services.AddScoped<IGameRepository, GameRepository>();
@@ -108,7 +107,6 @@ namespace Savanna.Web
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Account}/{action=Login}/{id?}");
-            app.MapHub<GameHub>("/gameHub");
 
             app.Run();
         }

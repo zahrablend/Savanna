@@ -4,21 +4,27 @@ namespace Common.ValueObjects;
 
 public class AnimalDictionary
 {
-    private Dictionary<string, (char Symbol, string Icon)> _animalDict;
+    private Dictionary<string, AnimalRepresentation> _animalDict;
 
     public AnimalDictionary()
     {
-        _animalDict = new Dictionary<string, (char, string)>();
+        _animalDict = new Dictionary<string, AnimalRepresentation>();
+    }
+
+    //Added for debugging
+    public IEnumerable<KeyValuePair<string, AnimalRepresentation>> GetRepresentations()
+    {
+        return _animalDict;
     }
 
     public void RepresentAnimal(IAnimalFactory animalFactory)
     {
-        _animalDict[animalFactory.Species] = (animalFactory.Symbol, animalFactory.Icon);
+        _animalDict[animalFactory.Species] = new AnimalRepresentation { Symbol = animalFactory.Symbol, Icon = animalFactory.Icon };
     }
 
-    public (char Symbol, string Icon) this[string species]
+    public bool TryGetRepresentation(string species, out AnimalRepresentation representation)
     {
-        get { return _animalDict[species]; }
+        return _animalDict.TryGetValue(species, out representation);
     }
 }
 

@@ -4,7 +4,6 @@ namespace Common.Entities;
 
 public class AnimalEntity : GameEntity
 {
-    [Key]
     public int AnimalId { get; set; }
     public string? Species { get; set; }
     public int Age { get; set; }
